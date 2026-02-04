@@ -5,6 +5,13 @@ edition.workspace = true
 rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
+description = "Git worktree and tmux workflow manager - create branches with isolated worktrees and automatic tmux sessions"
+keywords = ["git", "worktree", "tmux", "cli", "workflow"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "../../README.md"
+homepage = "https://github.com/aryayt/flow"
+documentation = "https://github.com/aryayt/flow#readme"
 
 [[bin]]
 name = "flow"
@@ -23,6 +30,7 @@ tracing-subscriber.workspace = true
 skim.workspace = true
 ratatui.workspace = true
 crossterm.workspace = true
+dirs.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true

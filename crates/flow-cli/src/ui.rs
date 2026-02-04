@@ -186,8 +186,9 @@ pub fn truncate_path(path: &std::path::Path, max_len: usize) -> String {
     }
 
     // Try to show ~/... format
-    if let Ok(home) = std::env::var("HOME") {
-        if let Some(stripped) = path_str.strip_prefix(&home) {
+    if let Some(home) = dirs::home_dir() {
+        let home_str = home.display().to_string();
+        if let Some(stripped) = path_str.strip_prefix(&home_str) {
             let short = format!("~{stripped}");
             if short.len() <= max_len {
                 return short;
