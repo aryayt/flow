@@ -11,10 +11,6 @@
 </p>
 
 <p align="center">
-  <img src="./demos/gifs/demo.gif" alt="Flow Demo" width="800">
-</p>
-
-<p align="center">
   <a href="#installation">Installation</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#commands">Commands</a> •
@@ -341,10 +337,6 @@ flow/
 │   └── flow-sync/             # Multi-machine sync
 │       └── src/
 │           └── provider.rs    # Trait for sync backends
-│
-├── demos/                     # VHS terminal recordings
-│   ├── demo.tape              # Main demo
-│   └── gifs/                  # Generated GIFs
 │
 └── extensions/                # TypeScript extensions
     └── src/
