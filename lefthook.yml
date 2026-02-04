@@ -17,11 +17,15 @@ pre-commit:
       root: "extensions/"
       glob: "*.{ts,js}"
       run: npm run check
+      skip:
+        - run: "[ ! -d extensions/node_modules ]"
 
     ts-format:
       root: "extensions/"
       glob: "*.{ts,js}"
       run: npx biome check --write {staged_files}
+      skip:
+        - run: "[ ! -d extensions/node_modules ]"
 
 pre-push:
   commands:
