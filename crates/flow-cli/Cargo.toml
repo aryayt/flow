@@ -1,0 +1,32 @@
+[package]
+name = "flow-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "flow"
+path = "src/main.rs"
+
+[dependencies]
+flow-core = { path = "../flow-core" }
+flow-git = { path = "../flow-git" }
+flow-tmux = { path = "../flow-tmux" }
+flow-sync = { path = "../flow-sync" }
+
+clap.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+skim.workspace = true
+ratatui.workspace = true
+crossterm.workspace = true
+
+[dev-dependencies]
+assert_cmd.workspace = true
+predicates.workspace = true
+
+[lints]
+workspace = true

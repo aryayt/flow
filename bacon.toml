@@ -1,0 +1,48 @@
+default_job = "check"
+
+[jobs.check]
+command = ["cargo", "check", "--all-targets", "--all-features"]
+need_stdout = false
+watch = ["src", "tests", "examples", "benches"]
+
+[jobs.check-all]
+command = ["cargo", "check", "--all-targets", "--all-features", "--workspace"]
+need_stdout = false
+
+[jobs.clippy]
+command = ["cargo", "clippy", "--all-targets", "--all-features", "--", "-W", "clippy::pedantic", "-W", "clippy::nursery"]
+need_stdout = false
+
+[jobs.clippy-fix]
+command = ["cargo", "clippy", "--all-targets", "--all-features", "--fix", "--allow-dirty", "--"]
+need_stdout = true
+
+[jobs.test]
+command = ["cargo", "nextest", "run"]
+need_stdout = true
+on_success = "back"
+
+[jobs.test-all]
+command = ["cargo", "nextest", "run", "--workspace"]
+need_stdout = true
+
+[jobs.doc]
+command = ["cargo", "doc", "--no-deps", "--all-features"]
+need_stdout = false
+
+[jobs.audit]
+command = ["cargo", "audit"]
+need_stdout = true
+
+[jobs.machete]
+command = ["cargo", "machete"]
+need_stdout = true
+
+[keybindings]
+c = "job:clippy"
+t = "job:test"
+T = "job:test-all"
+d = "job:doc"
+a = "job:audit"
+m = "job:machete"
+f = "job:clippy-fix"

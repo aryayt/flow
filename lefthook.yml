@@ -1,0 +1,32 @@
+pre-commit:
+  parallel: true
+  commands:
+    rust-fmt:
+      glob: "*.rs"
+      run: cargo fmt --check
+
+    rust-clippy:
+      glob: "*.rs"
+      run: cargo clippy --all-targets --all-features -- -D warnings
+
+    rust-test:
+      glob: "*.rs"
+      run: cargo nextest run --no-fail-fast --no-tests=pass
+
+    ts-check:
+      root: "extensions/"
+      glob: "*.{ts,js}"
+      run: npm run check
+
+    ts-format:
+      root: "extensions/"
+      glob: "*.{ts,js}"
+      run: npx biome check --write {staged_files}
+
+pre-push:
+  commands:
+    audit:
+      run: cargo audit
+
+    machete:
+      run: cargo machete
