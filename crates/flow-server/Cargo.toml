@@ -1,0 +1,25 @@
+[package]
+name = "flow-server"
+description = "axum web server for autoforge (migrated from claude-task-viewer)"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+flow-core = { workspace = true }
+flow-db = { workspace = true }
+flow-resolver = { workspace = true }
+axum = { workspace = true }
+tokio = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+notify = { workspace = true }
+dirs = { workspace = true }
+tracing = { workspace = true }
+async-stream = { workspace = true }
+futures-core = { workspace = true }
+futures-util = { workspace = true }
+
+[lints]
+workspace = true

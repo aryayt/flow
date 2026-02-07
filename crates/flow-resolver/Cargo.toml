@@ -1,0 +1,15 @@
+[package]
+name = "flow-resolver"
+description = "Dependency resolution, topological sorting, and scheduling for autoforge"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+flow-core = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+
+[lints]
+workspace = true

@@ -1,0 +1,20 @@
+[package]
+name = "flow-orchestrator"
+description = "Agent process management and batch scheduling for autoforge"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+flow-core = { workspace = true }
+flow-db = { workspace = true }
+flow-resolver = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+thiserror = { workspace = true }
+notify-debouncer-full = { workspace = true }
+notify = { workspace = true }
+
+[lints]
+workspace = true

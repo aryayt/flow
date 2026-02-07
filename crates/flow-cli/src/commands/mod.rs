@@ -1,6 +1,10 @@
 pub mod branch;
+pub mod features;
+pub mod monitor;
 pub mod scan;
+pub mod serve;
 pub mod status;
 pub mod switch;
 pub mod sync;
+pub mod theme_cmd;
 pub mod worktree;
