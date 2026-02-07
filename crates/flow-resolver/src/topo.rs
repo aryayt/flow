@@ -60,7 +60,9 @@ pub fn topological_sort(features: &[Feature]) -> Result<Vec<Feature>, FlowError>
             // Only include dependencies that exist in our feature set
             if feature_ids.contains(&dep_id) {
                 dependents.entry(dep_id).or_default().push(feature.id);
-                *in_degree.get_mut(&feature.id).unwrap() += 1;
+                *in_degree
+                    .get_mut(&feature.id)
+                    .expect("in_degree initialized for all feature IDs") += 1;
             }
         }
     }
@@ -87,7 +89,9 @@ pub fn topological_sort(features: &[Feature]) -> Result<Vec<Feature>, FlowError>
         // Update dependents
         if let Some(deps) = dependents.get(&node.id) {
             for &dependent_id in deps {
-                let degree = in_degree.get_mut(&dependent_id).unwrap();
+                let degree = in_degree
+                    .get_mut(&dependent_id)
+                    .expect("dependent_id is a valid feature ID");
                 *degree -= 1;
                 if *degree == 0 {
                     let dependent = feature_map[&dependent_id];
