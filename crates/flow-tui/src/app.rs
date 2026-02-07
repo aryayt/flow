@@ -244,15 +244,12 @@ impl App {
             path.clone()
         } else {
             // Try default path: ~/.agent-flow/flow.db
-            let home = match std::env::var("HOME") {
-                Ok(h) => PathBuf::from(h),
-                Err(_) => {
-                    self.db_error = Some("HOME environment variable not set".to_string());
-                    self.load_demo_data();
-                    return;
-                }
+            let Ok(home) = std::env::var("HOME") else {
+                self.db_error = Some("HOME environment variable not set".to_string());
+                self.load_demo_data();
+                return;
             };
-            home.join(".agent-flow").join("flow.db")
+            PathBuf::from(home).join(".agent-flow").join("flow.db")
         };
 
         // Try to open database
@@ -334,7 +331,7 @@ impl App {
 
         match result {
             Ok(_) => {
-                self.set_status(format!("✓ Claimed \"{}\" (#{feature_id})", feature_name));
+                self.set_status(format!("✓ Claimed \"{feature_name}\" (#{feature_id})"));
                 self.add_log(format!("Claimed feature #{feature_id}: {feature_name}"));
                 self.load_from_database();
             }
@@ -368,7 +365,7 @@ impl App {
 
         match result {
             Ok(()) => {
-                self.set_status(format!("✓ Marked \"{}\" as passing", feature_name));
+                self.set_status(format!("✓ Marked \"{feature_name}\" as passing"));
                 self.add_log(format!("Marked feature #{feature_id} as passing"));
                 self.load_from_database();
             }
@@ -404,7 +401,7 @@ impl App {
 
         match result {
             Ok(()) => {
-                self.set_status(format!("✓ Marked \"{}\" as failing", feature_name));
+                self.set_status(format!("✓ Marked \"{feature_name}\" as failing"));
                 self.add_log(format!("Marked feature #{feature_id} as failing"));
                 self.load_from_database();
             }
@@ -440,7 +437,7 @@ impl App {
 
         match result {
             Ok(()) => {
-                self.set_status(format!("✓ Cleared in-progress for \"{}\"", feature_name));
+                self.set_status(format!("✓ Cleared in-progress for \"{feature_name}\""));
                 self.add_log(format!("Cleared in-progress for feature #{feature_id}"));
                 self.load_from_database();
             }

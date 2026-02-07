@@ -1,3 +1,9 @@
+#![allow(clippy::future_not_send)] // &Connection is inherently !Send — structural to design
+#![allow(clippy::cognitive_complexity)] // orchestration logic is complex by nature
+#![allow(clippy::too_many_lines)] // same — event loops and schedulers are large
+#![allow(clippy::unused_async)] // async fn signatures kept for consistent API contract
+#![allow(clippy::unnecessary_wraps)] // Result return types kept for API consistency
+
 //! Agent orchestration system for Flow.
 //!
 //! This crate provides the core orchestration logic for managing multiple AI coding agents

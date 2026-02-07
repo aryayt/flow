@@ -119,6 +119,7 @@ impl Scheduler {
     }
 
     /// Schedule by priority - assign highest-scoring feature to first idle agent.
+    #[allow(clippy::unused_self)]
     fn schedule_by_priority(
         &self,
         idle_agents: &[&Agent],

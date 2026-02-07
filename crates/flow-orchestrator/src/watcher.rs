@@ -92,9 +92,7 @@ impl TaskWatcher {
         event_tx: &broadcast::Sender<FlowEvent>,
     ) -> Result<()> {
         // Only process JSON files
-        let path = if let Some(path) = event.paths.first() {
-            path
-        } else {
+        let Some(path) = event.paths.first() else {
             return Ok(());
         };
 

@@ -312,13 +312,11 @@ impl Orchestrator {
 
             // If the agent was working and is now idle, it completed
             if was_working && agent.status.is_idle() && is_healthy {
-                if matches!(agent.status, AgentStatus::Idle) {
-                    completed.push(agent_id.clone());
-                }
+                completed.push(agent_id.clone());
             }
 
             // If the agent crashed, record the failure
-            if let AgentStatus::Crashed { .. } = &agent.status {
+            if agent.status.is_crashed() {
                 failed.push(agent_id.clone());
             }
         }
@@ -381,10 +379,9 @@ impl Orchestrator {
         for agent_id in timed_out {
             if let Some(agent) = self.agents.get_mut(&agent_id) {
                 // Get the feature ID before killing
-                let feature_id = if let AgentStatus::Working { feature_id, .. } = agent.status {
-                    Some(feature_id)
-                } else {
-                    None
+                let feature_id = match agent.status {
+                    AgentStatus::Working { feature_id, .. } => Some(feature_id),
+                    _ => None,
                 };
 
                 // Kill the agent

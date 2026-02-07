@@ -150,6 +150,8 @@ impl Agent {
 
         // Write feature description to stdin
         if let Some(mut stdin) = child.stdin.take() {
+            use tokio::io::AsyncWriteExt;
+
             let prompt = format!(
                 "Implement the following feature:\n\n**{}**\n\n{}\n\nSteps:\n{}",
                 feature.name,
@@ -159,7 +161,6 @@ impl Agent {
 
             // Spawn a task to write to stdin without blocking
             tokio::spawn(async move {
-                use tokio::io::AsyncWriteExt;
                 if let Err(e) = stdin.write_all(prompt.as_bytes()).await {
                     warn!(error = %e, "Failed to write to agent stdin");
                 }
@@ -287,6 +288,7 @@ impl Agent {
                 use nix::unistd::Pid;
 
                 if let Some(pid) = child.id() {
+                    #[allow(clippy::cast_possible_wrap)]
                     let _ = kill(Pid::from_raw(pid as i32), Signal::SIGTERM);
 
                     // Wait up to 5 seconds for graceful shutdown
@@ -320,33 +322,30 @@ impl Agent {
     ///
     /// Returns a stream that yields stdout and stderr lines as they are produced.
     pub fn output_lines(&mut self) -> Option<impl tokio_stream::Stream<Item = String>> {
-        if let Some(child) = &mut self.child {
-            let stdout = child.stdout.take()?;
-            let stderr = child.stderr.take()?;
+        use tokio_stream::StreamExt;
 
-            let stdout_reader = BufReader::new(stdout);
-            let stderr_reader = BufReader::new(stderr);
+        let child = self.child.as_mut()?;
+        let stdout = child.stdout.take()?;
+        let stderr = child.stderr.take()?;
 
-            let stdout_stream = tokio_stream::wrappers::LinesStream::new(stdout_reader.lines());
-            let stderr_stream = tokio_stream::wrappers::LinesStream::new(stderr_reader.lines());
+        let stdout_reader = BufReader::new(stdout);
+        let stderr_reader = BufReader::new(stderr);
 
-            use tokio_stream::StreamExt;
-            let combined = stdout_stream
-                .merge(stderr_stream)
-                .filter_map(std::result::Result::ok);
+        let stdout_stream = tokio_stream::wrappers::LinesStream::new(stdout_reader.lines());
+        let stderr_stream = tokio_stream::wrappers::LinesStream::new(stderr_reader.lines());
 
-            Some(combined)
-        } else {
-            None
-        }
+        let combined = stdout_stream
+            .merge(stderr_stream)
+            .filter_map(std::result::Result::ok);
+
+        Some(combined)
     }
 
     /// Get the elapsed time for the current work (if working).
     pub fn work_duration(&self) -> Option<std::time::Duration> {
-        if let AgentStatus::Working { started, .. } = &self.status {
-            Some(started.elapsed())
-        } else {
-            None
+        match &self.status {
+            AgentStatus::Working { started, .. } => Some(started.elapsed()),
+            _ => None,
         }
     }
 }
@@ -377,6 +376,7 @@ mod nix {
     pub mod sys {
         pub mod signal {
             #[derive(Debug)]
+            #[allow(clippy::upper_case_acronyms)]
             pub enum Signal {
                 SIGTERM,
             }
@@ -389,6 +389,7 @@ mod nix {
                 }
             }
 
+            #[allow(clippy::unnecessary_wraps)]
             pub const fn kill(_pid: Pid, _signal: Signal) -> std::io::Result<()> {
                 // Stub implementation - in real code, this would send the signal
                 Ok(())
