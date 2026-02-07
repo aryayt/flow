@@ -29,7 +29,7 @@ pub fn feature_to_task(feature: &Feature, _session_id: &str) -> Task {
         description: feature.description.clone(),
         active_form,
         status: status.to_string(),
-        owner: "autoforge".to_string(),
+        owner: "flow".to_string(),
         blocks: vec![],
         blocked_by,
     }
@@ -93,7 +93,7 @@ mod tests {
         assert_eq!(task.status, "in_progress");
         assert!(task.active_form.contains("Working on"));
         assert_eq!(task.blocked_by, vec!["10", "20"]);
-        assert_eq!(task.owner, "autoforge");
+        assert_eq!(task.owner, "flow");
     }
 
     #[test]

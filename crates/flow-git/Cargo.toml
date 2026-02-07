@@ -1,13 +1,17 @@
 [package]
 name = "flow-git"
+description = "Git worktree operations for the Flow workspace manager"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
+keywords = ["git", "worktree"]
+categories = ["development-tools"]
 
 [dependencies]
-flow-core = { path = "../flow-core" }
+flow-core = { workspace = true }
 gix.workspace = true
 thiserror.workspace = true
 tracing.workspace = true

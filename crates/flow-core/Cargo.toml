@@ -1,10 +1,15 @@
 [package]
 name = "flow-core"
+description = "Shared types, configuration, themes, and error handling for the Flow workspace manager"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["workflow", "types", "configuration", "themes"]
+categories = ["development-tools"]
 
 [dependencies]
 serde.workspace = true

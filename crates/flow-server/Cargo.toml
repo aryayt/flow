@@ -1,8 +1,15 @@
 [package]
 name = "flow-server"
-description = "axum web server for autoforge (migrated from claude-task-viewer)"
+description = "High-performance axum web server with SSE and WebSocket for Flow task monitoring"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["axum", "server", "sse", "websocket", "monitoring"]
+categories = ["web-programming::http-server"]
 
 [dependencies]
 flow-core = { workspace = true }

@@ -56,7 +56,7 @@ pub async fn run_server(config: AgentConfig) -> flow_core::Result<()> {
                 .map_or_else(
                     || std::path::PathBuf::from("public"),
                     |exe| {
-                        let candidate = exe.join("../public");
+                        let candidate = exe.join("..").join("public");
                         if candidate.exists() {
                             candidate
                         } else {
@@ -94,14 +94,11 @@ pub async fn run_server(config: AgentConfig) -> flow_core::Result<()> {
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.port));
     info!("Server running at http://localhost:{}", config.port);
 
-    // Open browser if requested
+    // Open browser if requested (cross-platform)
     if config.open_browser {
         let url = format!("http://localhost:{}", config.port);
         tokio::spawn(async move {
-            let _ = tokio::process::Command::new("open")
-                .arg(&url)
-                .status()
-                .await;
+            let _ = open_browser(&url).await;
         });
     }
 
@@ -113,5 +110,31 @@ pub async fn run_server(config: AgentConfig) -> flow_core::Result<()> {
         .await
         .map_err(|e| flow_core::FlowError::Io(std::io::Error::other(e)))?;
 
+    Ok(())
+}
+
+/// Open a URL in the default browser (cross-platform).
+async fn open_browser(url: &str) -> Result<(), std::io::Error> {
+    #[cfg(target_os = "macos")]
+    {
+        tokio::process::Command::new("open")
+            .arg(url)
+            .status()
+            .await?;
+    }
+    #[cfg(target_os = "linux")]
+    {
+        tokio::process::Command::new("xdg-open")
+            .arg(url)
+            .status()
+            .await?;
+    }
+    #[cfg(target_os = "windows")]
+    {
+        tokio::process::Command::new("cmd")
+            .args(["/C", "start", "", url])
+            .status()
+            .await?;
+    }
     Ok(())
 }

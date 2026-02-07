@@ -111,10 +111,15 @@ pub fn run(all: bool) -> Result<()> {
 }
 
 fn which_command(cmd: &str) -> bool {
-    std::process::Command::new("which")
+    #[cfg(windows)]
+    let result = std::process::Command::new("where.exe")
         .arg(cmd)
-        .output()
-        .is_ok_and(|o| o.status.success())
+        .output();
+    #[cfg(not(windows))]
+    let result = std::process::Command::new("which")
+        .arg(cmd)
+        .output();
+    result.is_ok_and(|o| o.status.success())
 }
 
 fn run_semgrep() -> Result<()> {

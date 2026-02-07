@@ -32,7 +32,8 @@ pub fn create(name: &str, base: &str) -> Result<PathBuf, WorktreeError> {
 
     let worktree_path = config
         .projects_dir
-        .join(format!("{project_name}-worktrees/{name}"));
+        .join(format!("{project_name}-worktrees"))
+        .join(name);
 
     let output = std::process::Command::new("git")
         .args([

@@ -19,7 +19,7 @@ impl Default for Config {
 }
 
 fn home_dir() -> PathBuf {
-    dirs::home_dir().unwrap_or_else(|| PathBuf::from("/tmp"))
+    dirs::home_dir().unwrap_or_else(std::env::temp_dir)
 }
 
 fn config_dir() -> PathBuf {
@@ -29,7 +29,7 @@ fn config_dir() -> PathBuf {
 fn state_dir() -> PathBuf {
     dirs::state_dir()
         .or_else(dirs::data_local_dir)
-        .unwrap_or_else(|| home_dir().join(".local/state"))
+        .unwrap_or_else(|| home_dir().join(".local").join("state"))
 }
 
 impl Config {
@@ -39,7 +39,7 @@ impl Config {
     ///
     /// Returns an error if the config file exists but cannot be read or parsed.
     pub fn load() -> Result<Self, crate::FlowError> {
-        let config_path = config_dir().join("flow/config.toml");
+        let config_path = config_dir().join("flow").join("config.toml");
 
         if config_path.exists() {
             let content = std::fs::read_to_string(&config_path)?;

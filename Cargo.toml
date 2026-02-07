@@ -15,7 +15,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 rust-version = "1.80.0"
 authors = ["Arya <universitybuddyai@gmail.com>"]
@@ -24,15 +24,16 @@ repository = "https://github.com/aryayt/flow"
 
 [workspace.dependencies]
 # Internal crates
-flow-core = { path = "crates/flow-core" }
-flow-db = { path = "crates/flow-db" }
-flow-resolver = { path = "crates/flow-resolver" }
-flow-server = { path = "crates/flow-server" }
-flow-mcp = { path = "crates/flow-mcp" }
-flow-orchestrator = { path = "crates/flow-orchestrator" }
-flow-git = { path = "crates/flow-git" }
-flow-tmux = { path = "crates/flow-tmux" }
-flow-sync = { path = "crates/flow-sync" }
+flow-core = { path = "crates/flow-core", version = "0.1.1" }
+flow-db = { path = "crates/flow-db", version = "0.1.1" }
+flow-resolver = { path = "crates/flow-resolver", version = "0.1.1" }
+flow-server = { path = "crates/flow-server", version = "0.1.1" }
+flow-mcp = { path = "crates/flow-mcp", version = "0.1.1" }
+flow-orchestrator = { path = "crates/flow-orchestrator", version = "0.1.1" }
+flow-git = { path = "crates/flow-git", version = "0.1.1" }
+flow-tmux = { path = "crates/flow-tmux", version = "0.1.1" }
+flow-sync = { path = "crates/flow-sync", version = "0.1.1" }
+flow-tui = { path = "crates/flow-tui", version = "0.1.1" }
 
 # CLI
 clap = { version = "4.5", features = ["derive", "env"] }

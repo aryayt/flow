@@ -1,8 +1,15 @@
 [package]
 name = "flow-tui"
-description = "Terminal UI for autoforge using ratatui"
+description = "Terminal UI for Flow with Kanban board, agent status, and dependency graph views"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["tui", "ratatui", "kanban", "terminal", "dashboard"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 flow-core = { workspace = true }

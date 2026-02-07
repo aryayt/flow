@@ -1,8 +1,15 @@
 [package]
 name = "flow-resolver"
-description = "Dependency resolution, topological sorting, and scheduling for autoforge"
+description = "Dependency resolution, topological sorting, and scheduling scores for Flow features"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["topological-sort", "dependency", "scheduling", "graph"]
+categories = ["algorithms"]
 
 [dependencies]
 flow-core = { workspace = true }

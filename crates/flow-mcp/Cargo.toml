@@ -1,8 +1,13 @@
 [package]
 name = "flow-mcp"
-description = "MCP server exposing feature management tools for autoforge"
+description = "MCP server exposing feature management tools for Flow"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
 
 [dependencies]
 flow-core = { workspace = true }

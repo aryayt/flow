@@ -1,8 +1,13 @@
 [package]
 name = "flow-orchestrator"
-description = "Agent process management and batch scheduling for autoforge"
+description = "Agent process management and batch scheduling for Flow"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
 
 [dependencies]
 flow-core = { workspace = true }

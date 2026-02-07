@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-/// A feature tracked in `SQLite` - the primary unit of work in autoforge.
+/// A feature tracked in `SQLite` - the primary unit of work in Flow.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Feature {

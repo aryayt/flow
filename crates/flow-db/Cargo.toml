@@ -1,8 +1,15 @@
 [package]
 name = "flow-db"
-description = "SQLite database layer for autoforge features and events"
+description = "SQLite database layer for Flow feature management with WAL mode and event logging"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["sqlite", "database", "features", "crud"]
+categories = ["database"]
 
 [dependencies]
 flow-core = { workspace = true }

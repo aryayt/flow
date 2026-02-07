@@ -1,67 +1,71 @@
-# CLAUDE.md
+# Flow - Agent Instructions
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## What This Project Is
 
-## Build & Test Commands
+Flow is a Rust CLI that combines git worktree management with AI agent task monitoring. Binary name: `flow`. Published on crates.io as `flow-cli`.
+
+## Quick Commands
 
 ```bash
-# Rust
-cargo build                                              # Build
-cargo check --all-targets --all-features                 # Quick check
-cargo clippy --all-targets --all-features -- -D warnings # Lint
-cargo fmt                                                # Format
-cargo nextest run                                        # Run all tests
-cargo nextest run -p flow-git                            # Test single crate
-cargo nextest run test_worktree_create                   # Run specific test
-bacon                                                    # Watch mode (t=test, c=clippy)
+# Build
+cargo build                    # Debug build
+cargo build --release          # Release build (~7MB binary)
 
-# TypeScript extensions
-cd extensions && npm run check                           # Lint + type check
-cd extensions && npm run build                           # Compile
+# Test (56 tests across 3 crates)
+cargo test                     # Run all tests
+cargo test -p flow-db          # 22 tests: SQLite CRUD, transactions
+cargo test -p flow-resolver    # 32 tests: topo sort, cycles, scoring
+cargo test -p flow-server      # 2 tests: helpers
+
+# Lint
+cargo fmt --all -- --check     # Check formatting
+cargo clippy --all-targets     # Workspace uses pedantic + nursery lints
+
+# Run
+cargo run -p flow-cli -- status       # Show worktrees/sessions
+cargo run -p flow-cli -- serve        # Web dashboard on :3456
+cargo run -p flow-cli -- monitor      # Terminal UI
+cargo run -p flow-cli -- features list # List features in SQLite
+cargo run -p flow-cli -- theme list   # Show 7 themes
 ```
 
 ## Architecture
 
-**flow** is a Rust CLI for multi-agent development workflows, managing git worktrees, TMUX sessions, and project switching.
-
-### Workspace Crates
+11-crate Cargo workspace. Dependencies flow downward:
 
 ```
-crates/
-├── flow-cli/      # Binary entry point (clap CLI) - orchestrates other crates
-├── flow-core/     # Config (~/.config/flow/config.toml), state, project discovery
-├── flow-git/      # Git worktree operations (using shell commands, gix available)
-├── flow-tmux/     # TMUX session/window management (using shell commands)
-└── flow-sync/     # Multi-machine state sync (stub - uses provider trait)
+flow-cli (binary)
+  ├── flow-server (axum web server, SSE, WebSocket)
+  ├── flow-tui (ratatui terminal UI)
+  ├── flow-git (worktree ops via gix)
+  ├── flow-tmux (session management)
+  └── flow-sync (state sync)
+        ├── flow-db (SQLite, rusqlite with WAL)
+        ├── flow-resolver (Kahn's topo sort, DFS cycle detection)
+        └── flow-core (types, config, themes, errors)
 ```
 
-**Dependency flow**: `flow-cli` → `flow-{core,git,tmux,sync}` → `flow-core`
+Stubs (not yet implemented): flow-mcp, flow-orchestrator
 
-### Key Patterns
+## Key Conventions
 
-- **Error handling**: `thiserror` for library crates, `anyhow` for CLI
-- **Workspace lints**: Defined in root `Cargo.toml` - clippy pedantic/nursery enabled, unsafe forbidden
-- **No async in commands**: Functions are sync; remove `async` if no `.await` (clippy enforces)
-- **Config paths**: `~/.config/flow/config.toml` for config, `~/.local/state/flow/` for state
+- **Error handling**: `thiserror` in libraries, `anyhow` in CLI
+- **Serialization**: `serde` with `#[serde(rename_all = "camelCase")]` for JSON
+- **Database**: SQLite with WAL mode, `rusqlite` bundled feature
+- **Async**: `tokio` for server, sync code for CLI and DB operations
+- **Paths**: Always use `dirs` crate (`home_dir()`, `config_dir()`), never hardcode
+- **Lints**: `unsafe_code = "forbid"`, clippy pedantic + nursery workspace-wide
+- **Tests**: Standard `#[test]`, in-memory SQLite for DB tests
+- **Themes**: 7 themes defined once in flow-core, projected to ANSI (TUI) and CSS (web)
 
-### CLI Commands
+## File Paths
 
-| Command | Handler | Description |
-|---------|---------|-------------|
-| `flow branch <name>` | `commands/branch.rs` | Create worktree + tmux session |
-| `flow switch [query]` | `commands/switch.rs` | Fuzzy-find projects with skim |
-| `flow worktree list\|remove` | `commands/worktree.rs` | Manage worktrees |
-| `flow sync` | `commands/sync.rs` | Sync state across machines |
-| `flow scan [--all]` | `commands/scan.rs` | Run security scanners |
-| `flow status [--mobile]` | `commands/status.rs` | Show dashboard |
+- Task JSON files: `~/.claude/tasks/{session-id}/{task-id}.json`
+- Project metadata: `~/.claude/projects/`
+- Workflow config: `~/.config/flow/config.toml`
+- Agent data: `~/.claude/data/`
 
-### TypeScript Extensions
-
-Located in `extensions/src/`:
-- `scanners/` - Wrappers for semgrep, trivy
-- `hooks/` - Lifecycle hooks (post-branch, post-switch)
-
-Uses Biome for linting/formatting. Build with `npm run build`.
+Use `dirs::home_dir()` for `~`, `dirs::config_dir()` for config, `Path::join()` for construction. Never string-concatenate paths.
 
 ## Adding New Features
 
@@ -76,17 +80,21 @@ Uses Biome for linting/formatting. Build with `npm run build`.
 2. Add to `members` in root `Cargo.toml`
 3. Use `[lints] workspace = true` in crate's Cargo.toml
 
-## Pre-Commit Hooks
+## Publishing
 
-Lefthook runs on commit:
-- `cargo fmt --check`
-- `cargo clippy --all-targets --all-features -- -D warnings`
-- `cargo nextest run --no-fail-fast`
+Published to crates.io as 9 crates (flow-mcp and flow-orchestrator are `publish = false`).
 
-## Key Dependencies
+Publishing order (dependencies first):
+1. flow-core
+2. flow-db, flow-resolver, flow-git, flow-tmux, flow-sync
+3. flow-server, flow-tui
+4. flow-cli
 
-- **clap** 4.5 - CLI parsing with derive
-- **gix** 0.66 - Git operations (currently using shell commands instead)
-- **skim** 0.10 - Fuzzy finder (embedded, not CLI)
-- **ratatui** 0.26 - TUI (for future status dashboard)
-- **tmux_interface** 0.3 - TMUX control (currently using shell commands)
+## Do NOT
+
+- Modify the task JSON file format without updating both server and frontend
+- Remove SSE event broadcasting (core real-time mechanism)
+- Use `std::env::var("HOME")` instead of `dirs::home_dir()`
+- Use string concatenation for file paths
+- Add `unsafe` code (forbidden by workspace lint)
+- Skip `cargo test` before committing

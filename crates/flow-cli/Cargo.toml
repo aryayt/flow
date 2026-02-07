@@ -1,31 +1,30 @@
 [package]
 name = "flow-cli"
+description = "Git worktree workflow manager with AI agent task monitoring, Kanban board, and terminal UI"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-description = "Git worktree and tmux workflow manager - create branches with isolated worktrees and automatic tmux sessions"
+readme = "README.md"
+homepage = "https://github.com/aryayt/flow"
 keywords = ["git", "worktree", "tmux", "cli", "workflow"]
 categories = ["command-line-utilities", "development-tools"]
-readme = "../../README.md"
-homepage = "https://github.com/aryayt/flow"
-documentation = "https://github.com/aryayt/flow#readme"
 
 [[bin]]
 name = "flow"
 path = "src/main.rs"
 
 [dependencies]
-flow-core = { path = "../flow-core" }
-flow-git = { path = "../flow-git" }
-flow-tmux = { path = "../flow-tmux" }
-flow-sync = { path = "../flow-sync" }
-flow-db = { path = "../flow-db" }
-flow-resolver = { path = "../flow-resolver" }
-flow-server = { path = "../flow-server" }
-flow-tui = { path = "../flow-tui" }
+flow-core = { workspace = true }
+flow-git = { workspace = true }
+flow-tmux = { workspace = true }
+flow-sync = { workspace = true }
+flow-db = { workspace = true }
+flow-resolver = { workspace = true }
+flow-server = { workspace = true }
+flow-tui = { workspace = true }
 
 clap.workspace = true
 anyhow.workspace = true
