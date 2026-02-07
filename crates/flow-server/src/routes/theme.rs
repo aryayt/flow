@@ -26,9 +26,7 @@ pub struct SetThemeRequest {
 }
 
 /// GET /api/theme — Return current theme name and CSS variables
-pub async fn get_theme(
-    State(_state): State<Arc<AppState>>,
-) -> AppResult<Json<ThemeResponse>> {
+pub async fn get_theme(State(_state): State<Arc<AppState>>) -> AppResult<Json<ThemeResponse>> {
     // Default to aurora theme for now
     // In the future, this could read from a config file or database
     let theme = Theme::Aurora;

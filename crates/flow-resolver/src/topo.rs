@@ -1,6 +1,6 @@
 use flow_core::{Feature, FlowError};
-use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A wrapper for heap ordering that prioritizes by (highest priority first, lowest id for ties).
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -184,7 +184,7 @@ mod tests {
         assert_eq!(result.len(), 4);
         assert_eq!(result[0].id, 1); // A first
         assert_eq!(result[3].id, 4); // D last
-        // B and C can be in either order, but both come after A and before D
+                                     // B and C can be in either order, but both come after A and before D
         let b_pos = result.iter().position(|f| f.id == 2).unwrap();
         let c_pos = result.iter().position(|f| f.id == 3).unwrap();
         assert!(b_pos > 0 && b_pos < 3);

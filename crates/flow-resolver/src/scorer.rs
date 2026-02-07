@@ -127,9 +127,10 @@ pub fn are_dependencies_satisfied(feature: &Feature, all_features: &[Feature]) -
 
     let feature_map: HashMap<i64, &Feature> = all_features.iter().map(|f| (f.id, f)).collect();
 
-    feature.dependencies.iter().all(|dep_id| {
-        feature_map.get(dep_id).is_some_and(|dep| dep.passes)
-    })
+    feature
+        .dependencies
+        .iter()
+        .all(|dep_id| feature_map.get(dep_id).is_some_and(|dep| dep.passes))
 }
 
 #[cfg(test)]
@@ -247,7 +248,10 @@ mod tests {
     fn test_priority_normalization() {
         // Two features, different priorities, no deps
         // Lower priority value = more important = higher score
-        let features = vec![make_feature(1, 10, vec![], false), make_feature(2, 100, vec![], false)];
+        let features = vec![
+            make_feature(1, 10, vec![], false),
+            make_feature(2, 100, vec![], false),
+        ];
         let scores = compute_scores(&features);
 
         // Feature 1 (priority 10) should score higher than Feature 2 (priority 100)
@@ -256,7 +260,10 @@ mod tests {
 
         // The difference should be at least the priority component (10.0)
         let diff = scores[&1] - scores[&2];
-        assert!(diff >= 10.0, "Difference was {diff}, expected at least 10.0");
+        assert!(
+            diff >= 10.0,
+            "Difference was {diff}, expected at least 10.0"
+        );
     }
 
     #[test]

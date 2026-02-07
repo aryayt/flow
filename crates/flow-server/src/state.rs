@@ -1,3 +1,4 @@
+use flow_core::SessionMeta;
 use serde_json::Value;
 use std::{
     collections::HashMap,
@@ -8,7 +9,6 @@ use std::{
     time::{Duration, Instant},
 };
 use tokio::sync::{broadcast, RwLock};
-use flow_core::SessionMeta;
 
 /// Application state shared across all handlers
 pub struct AppState {
@@ -35,7 +35,9 @@ impl MetadataCache {
     pub fn new() -> Self {
         Self {
             data: HashMap::new(),
-            last_refresh: Instant::now().checked_sub(Duration::from_secs(60)).unwrap_or_else(Instant::now),
+            last_refresh: Instant::now()
+                .checked_sub(Duration::from_secs(60))
+                .unwrap_or_else(Instant::now),
         }
     }
 
@@ -106,13 +108,19 @@ pub fn load_session_metadata(projects_dir: &std::path::Path) -> HashMap<String, 
                         for entry in entries {
                             if let Some(sid) = entry.get("sessionId").and_then(|v| v.as_str()) {
                                 if let Some(meta) = metadata.get_mut(sid) {
-                                    if let Some(desc) = entry.get("description").and_then(|v| v.as_str()) {
+                                    if let Some(desc) =
+                                        entry.get("description").and_then(|v| v.as_str())
+                                    {
                                         meta.description = Some(desc.to_string());
                                     }
-                                    if let Some(branch) = entry.get("gitBranch").and_then(|v| v.as_str()) {
+                                    if let Some(branch) =
+                                        entry.get("gitBranch").and_then(|v| v.as_str())
+                                    {
                                         meta.git_branch = Some(branch.to_string());
                                     }
-                                    if let Some(created) = entry.get("created").and_then(|v| v.as_str()) {
+                                    if let Some(created) =
+                                        entry.get("created").and_then(|v| v.as_str())
+                                    {
                                         meta.created = Some(created.to_string());
                                     }
                                 }

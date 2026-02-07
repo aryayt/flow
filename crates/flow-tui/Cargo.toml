@@ -8,8 +8,8 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 readme = "README.md"
-keywords = ["tui", "ratatui", "kanban", "terminal", "dashboard"]
-categories = ["command-line-utilities"]
+keywords = ["tui", "ratatui", "kanban", "ai-agent", "dashboard"]
+categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
 agentflow-core = { workspace = true }

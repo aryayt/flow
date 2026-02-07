@@ -1,4 +1,6 @@
-use flow_core::{CreateFeatureInput, DependencyRef, Feature, FeatureGraphNode, FeatureStats, Result};
+use flow_core::{
+    CreateFeatureInput, DependencyRef, Feature, FeatureGraphNode, FeatureStats, Result,
+};
 use rusqlite::{Connection, OptionalExtension, Row};
 use std::collections::{HashMap, HashSet};
 
@@ -7,14 +9,17 @@ pub struct FeatureStore;
 impl FeatureStore {
     /// Create a new feature.
     pub fn create(conn: &Connection, input: &CreateFeatureInput) -> Result<Feature> {
-        let priority = input.priority.map_or_else(|| {
+        let priority = input.priority.map_or_else(
+            || {
                 // Auto-assign priority as MAX+1
                 let max_priority: Option<i32> = conn
                     .query_row("SELECT MAX(priority) FROM features", [], |row| row.get(0))
                     .ok()
                     .flatten();
                 max_priority.unwrap_or(0) + 1
-            }, |p| p);
+            },
+            |p| p,
+        );
 
         // Validate dependencies exist
         for dep_ref in &input.dependencies {
@@ -71,6 +76,7 @@ impl FeatureStore {
     }
 
     /// Create multiple features in a single transaction, resolving index-based dependencies.
+    #[allow(clippy::too_many_lines)]
     pub fn create_bulk(conn: &Connection, inputs: &[CreateFeatureInput]) -> Result<Vec<Feature>> {
         if inputs.is_empty() {
             return Ok(vec![]);
@@ -116,8 +122,9 @@ impl FeatureStore {
         }
 
         // Begin transaction for atomicity
-        conn.execute_batch("BEGIN IMMEDIATE")
-            .map_err(|e| flow_core::FlowError::Database(format!("begin transaction failed: {e}")))?;
+        conn.execute_batch("BEGIN IMMEDIATE").map_err(|e| {
+            flow_core::FlowError::Database(format!("begin transaction failed: {e}"))
+        })?;
 
         let result = (|| -> Result<Vec<Feature>> {
             // Get starting priority
@@ -186,8 +193,9 @@ impl FeatureStore {
             feature_ids
                 .into_iter()
                 .map(|id| {
-                    Self::get_by_id(conn, id)?
-                        .ok_or_else(|| flow_core::FlowError::Database("feature disappeared".to_string()))
+                    Self::get_by_id(conn, id)?.ok_or_else(|| {
+                        flow_core::FlowError::Database("feature disappeared".to_string())
+                    })
                 })
                 .collect()
         })();
@@ -208,11 +216,7 @@ impl FeatureStore {
     /// Get a feature by ID.
     pub fn get_by_id(conn: &Connection, id: i64) -> Result<Option<Feature>> {
         let result = conn
-            .query_row(
-                "SELECT * FROM features WHERE id = ?",
-                [id],
-                row_to_feature,
-            )
+            .query_row("SELECT * FROM features WHERE id = ?", [id], row_to_feature)
             .optional()
             .map_err(|e| flow_core::FlowError::Database(format!("query failed: {e}")))?;
         Ok(result)
@@ -288,7 +292,9 @@ impl FeatureStore {
             .filter(|f| {
                 !f.in_progress
                     && !f.passes
-                    && f.dependencies.iter().all(|dep_id| passing_ids.contains(dep_id))
+                    && f.dependencies
+                        .iter()
+                        .all(|dep_id| passing_ids.contains(dep_id))
             })
             .collect();
 
@@ -571,20 +577,14 @@ impl FeatureStore {
     /// Get the complete dependency graph with dependents computed.
     pub fn get_graph(conn: &Connection) -> Result<Vec<FeatureGraphNode>> {
         let features = Self::get_all(conn)?;
-        let passing_ids: HashSet<i64> = features
-            .iter()
-            .filter(|f| f.passes)
-            .map(|f| f.id)
-            .collect();
+        let passing_ids: HashSet<i64> =
+            features.iter().filter(|f| f.passes).map(|f| f.id).collect();
 
         // Build reverse dependency map (dependents)
         let mut dependents_map: HashMap<i64, Vec<i64>> = HashMap::new();
         for feature in &features {
             for dep_id in &feature.dependencies {
-                dependents_map
-                    .entry(*dep_id)
-                    .or_default()
-                    .push(feature.id);
+                dependents_map.entry(*dep_id).or_default().push(feature.id);
             }
         }
 
@@ -618,20 +618,12 @@ impl FeatureStore {
 fn row_to_feature(row: &Row) -> rusqlite::Result<Feature> {
     let steps_json: String = row.get("steps")?;
     let steps: Vec<String> = serde_json::from_str(&steps_json).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(
-            0,
-            rusqlite::types::Type::Text,
-            Box::new(e),
-        )
+        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
     })?;
 
     let deps_json: String = row.get("dependencies")?;
     let dependencies: Vec<i64> = serde_json::from_str(&deps_json).map_err(|e| {
-        rusqlite::Error::FromSqlConversionFailure(
-            0,
-            rusqlite::types::Type::Text,
-            Box::new(e),
-        )
+        rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
     })?;
 
     let passes_int: i32 = row.get("passes")?;
@@ -653,6 +645,7 @@ fn row_to_feature(row: &Row) -> rusqlite::Result<Feature> {
 }
 
 #[cfg(test)]
+#[allow(clippy::significant_drop_tightening)]
 mod tests {
     use super::*;
     use crate::Database;
@@ -692,27 +685,30 @@ mod tests {
         let inputs = vec![
             CreateFeatureInput {
                 name: "Feature A".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: None,
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
             CreateFeatureInput {
                 name: "Feature B".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: None,
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![DependencyRef::Index { index: 0 }],
             },
             CreateFeatureInput {
                 name: "Feature C".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: None,
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
-                dependencies: vec![DependencyRef::Index { index: 0 }, DependencyRef::Index { index: 1 }],
+                dependencies: vec![
+                    DependencyRef::Index { index: 0 },
+                    DependencyRef::Index { index: 1 },
+                ],
             },
         ];
 
@@ -738,9 +734,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "Claimable".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -754,7 +750,10 @@ mod tests {
         // Second claim should fail
         let result = FeatureStore::claim_and_get(&conn, feature.id);
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), flow_core::FlowError::Conflict(_)));
+        assert!(matches!(
+            result.unwrap_err(),
+            flow_core::FlowError::Conflict(_)
+        ));
     }
 
     #[test]
@@ -766,9 +765,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "Test".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -797,9 +796,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F1".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -810,9 +809,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F2".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(2),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -844,9 +843,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F1".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -857,9 +856,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F2".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(2),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![DependencyRef::Id(f1.id)],
             },
@@ -896,9 +895,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F1".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -909,9 +908,9 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F2".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(2),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -937,7 +936,7 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F1".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
                 category: "Cat1".to_string(),
                 steps: vec![],
@@ -950,7 +949,7 @@ mod tests {
             &conn,
             &CreateFeatureInput {
                 name: "F2".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(2),
                 category: "Cat2".to_string(),
                 steps: vec![],

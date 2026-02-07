@@ -52,7 +52,7 @@ pub fn task_to_feature(task: &Task) -> Feature {
 
     Feature {
         id,
-        priority: 0, // Unknown from task
+        priority: 0,             // Unknown from task
         category: String::new(), // Unknown from task
         name: task.subject.clone(),
         description: task.description.clone(),
@@ -101,9 +101,9 @@ mod tests {
         let feature = Feature {
             id: 1,
             priority: 1,
-            category: "".to_string(),
+            category: String::new(),
             name: "Done".to_string(),
-            description: "".to_string(),
+            description: String::new(),
             steps: vec![],
             passes: true,
             in_progress: false,
@@ -122,9 +122,9 @@ mod tests {
         let feature = Feature {
             id: 2,
             priority: 1,
-            category: "".to_string(),
+            category: String::new(),
             name: "Pending".to_string(),
-            description: "".to_string(),
+            description: String::new(),
             steps: vec![],
             passes: false,
             in_progress: false,
@@ -165,10 +165,10 @@ mod tests {
         let task = Task {
             id: "1".to_string(),
             subject: "Done".to_string(),
-            description: "".to_string(),
-            active_form: "".to_string(),
+            description: String::new(),
+            active_form: String::new(),
             status: "completed".to_string(),
-            owner: "".to_string(),
+            owner: String::new(),
             blocks: vec![],
             blocked_by: vec![],
         };
@@ -203,7 +203,10 @@ mod tests {
         assert_eq!(converted_feature.description, original_feature.description);
         assert_eq!(converted_feature.passes, original_feature.passes);
         assert_eq!(converted_feature.in_progress, original_feature.in_progress);
-        assert_eq!(converted_feature.dependencies, original_feature.dependencies);
+        assert_eq!(
+            converted_feature.dependencies,
+            original_feature.dependencies
+        );
 
         // Some fields will be lost (priority, category, steps, timestamps)
         assert_eq!(converted_feature.priority, 0);

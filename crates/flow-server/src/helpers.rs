@@ -16,9 +16,7 @@ pub fn format_system_time(duration: Duration) -> String {
     // Calculate date from days since epoch (1970-01-01)
     let (year, month, day) = days_to_date(days_since_epoch as i64);
 
-    format!(
-        "{year:04}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}.{millis:03}Z"
-    )
+    format!("{year:04}-{month:02}-{day:02}T{hours:02}:{minutes:02}:{seconds:02}.{millis:03}Z")
 }
 
 /// Convert days since epoch to (year, month, day)
@@ -55,7 +53,7 @@ mod tests {
         assert_eq!(format_system_time(duration), "1970-01-01T00:00:00.000Z");
 
         // Test a known timestamp (2024-01-01 12:00:00)
-        let duration = Duration::from_secs(1704110400);
+        let duration = Duration::from_secs(1_704_110_400);
         assert_eq!(format_system_time(duration), "2024-01-01T12:00:00.000Z");
     }
 

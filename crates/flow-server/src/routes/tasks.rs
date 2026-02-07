@@ -1,4 +1,7 @@
-use crate::{error::{AppError, AppResult}, state::{get_metadata, AppState}};
+use crate::{
+    error::{AppError, AppResult},
+    state::{get_metadata, AppState},
+};
 use axum::{
     extract::{Path, State},
     response::Json,
@@ -76,7 +79,10 @@ pub async fn add_note(
         return Err(AppError::BadRequest("Note cannot be empty".into()));
     }
 
-    let task_path = state.tasks_dir.join(&session_id).join(format!("{task_id}.json"));
+    let task_path = state
+        .tasks_dir
+        .join(&session_id)
+        .join(format!("{task_id}.json"));
 
     if !task_path.exists() {
         return Err(AppError::NotFound("Task not found".into()));
@@ -138,5 +144,7 @@ pub async fn delete_task(
     fs::remove_file(&task_path)
         .map_err(|e| AppError::Internal(format!("Failed to delete task: {e}")))?;
 
-    Ok(Json(serde_json::json!({ "success": true, "taskId": task_id })))
+    Ok(Json(
+        serde_json::json!({ "success": true, "taskId": task_id }),
+    ))
 }

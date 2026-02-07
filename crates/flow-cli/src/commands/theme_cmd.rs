@@ -3,6 +3,7 @@ use anyhow::Result;
 use crossterm::style::Stylize;
 use flow_core::Theme;
 
+#[allow(clippy::unnecessary_wraps)]
 pub fn list() -> Result<()> {
     ui::print_section(icons::DOT, "Available Themes");
     for theme in Theme::ALL {
@@ -18,9 +19,7 @@ pub fn list() -> Result<()> {
 }
 
 pub fn set(name: &str) -> Result<()> {
-    let theme: Theme = name
-        .parse()
-        .map_err(|e: String| anyhow::anyhow!(e))?;
+    let theme: Theme = name.parse().map_err(|e: String| anyhow::anyhow!(e))?;
     ui::print_success(&format!("Theme set to: {}", theme.name()));
     Ok(())
 }

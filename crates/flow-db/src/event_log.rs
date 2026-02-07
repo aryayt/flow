@@ -17,6 +17,7 @@ pub struct ChangeEvent {
 }
 
 /// Log a change event for a feature.
+#[allow(clippy::too_many_arguments)]
 pub fn log_event(
     conn: &Connection,
     feature_id: i64,
@@ -82,6 +83,7 @@ pub fn get_events(conn: &Connection, feature_id: i64) -> Result<Vec<ChangeEvent>
 }
 
 #[cfg(test)]
+#[allow(clippy::significant_drop_tightening)]
 mod tests {
     use super::*;
     use crate::feature::FeatureStore;
@@ -97,9 +99,9 @@ mod tests {
             &conn,
             &flow_core::CreateFeatureInput {
                 name: "Test Feature".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -158,9 +160,9 @@ mod tests {
             &conn,
             &flow_core::CreateFeatureInput {
                 name: "Test".to_string(),
-                description: "".to_string(),
+                description: String::new(),
                 priority: Some(1),
-                category: "".to_string(),
+                category: String::new(),
                 steps: vec![],
                 dependencies: vec![],
             },
@@ -168,17 +170,7 @@ mod tests {
         .unwrap();
 
         // Log event with minimal fields
-        log_event(
-            &conn,
-            feature.id,
-            "comment",
-            None,
-            None,
-            None,
-            None,
-            "web",
-        )
-        .unwrap();
+        log_event(&conn, feature.id, "comment", None, None, None, None, "web").unwrap();
 
         let events = get_events(&conn, feature.id).unwrap();
         assert_eq!(events.len(), 1);

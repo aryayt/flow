@@ -1,4 +1,8 @@
-use crate::{error::{AppError, AppResult}, helpers::format_system_time, state::{get_metadata, AppState}};
+use crate::{
+    error::{AppError, AppResult},
+    helpers::format_system_time,
+    state::{get_metadata, AppState},
+};
 use axum::{
     extract::{Path, Query, State},
     response::Json,
@@ -84,9 +88,7 @@ pub async fn list_sessions(
             let modified_at = newest_mtime
                 .or_else(|| dir_stat.modified().ok())
                 .map(|t| {
-                    let duration = t
-                        .duration_since(SystemTime::UNIX_EPOCH)
-                        .unwrap_or_default();
+                    let duration = t.duration_since(SystemTime::UNIX_EPOCH).unwrap_or_default();
                     format_system_time(duration)
                 })
                 .unwrap_or_default();
@@ -131,7 +133,9 @@ pub async fn get_session(
     }
 
     let Ok(entries) = fs::read_dir(&session_path) else {
-        return Err(AppError::Internal("Failed to read session directory".into()));
+        return Err(AppError::Internal(
+            "Failed to read session directory".into(),
+        ));
     };
 
     let mut tasks: Vec<Task> = entries

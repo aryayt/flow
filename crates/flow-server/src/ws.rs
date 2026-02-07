@@ -1,6 +1,9 @@
 use crate::state::AppState;
 use axum::{
-    extract::{ws::{Message, WebSocket, WebSocketUpgrade}, State},
+    extract::{
+        ws::{Message, WebSocket, WebSocketUpgrade},
+        State,
+    },
     response::IntoResponse,
 };
 use futures_util::{SinkExt, StreamExt};
@@ -70,11 +73,7 @@ async fn handle_ws(socket: WebSocket, state: Arc<AppState>) {
         loop {
             match rx.recv().await {
                 Ok(data) => {
-                    if ws_sender
-                        .send(Message::Text(data))
-                        .await
-                        .is_err()
-                    {
+                    if ws_sender.send(Message::Text(data)).await.is_err() {
                         break;
                     }
                 }

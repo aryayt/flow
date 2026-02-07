@@ -1,3 +1,5 @@
+#![allow(clippy::significant_drop_tightening)]
+
 use crate::ui::{self, colors, icons};
 use anyhow::Result;
 use crossterm::style::Stylize;
@@ -9,10 +11,7 @@ fn default_db_path() -> std::path::PathBuf {
 }
 
 fn open_db(db_path: Option<&str>) -> Result<flow_db::Database> {
-    let path = match db_path {
-        Some(p) => std::path::PathBuf::from(p),
-        None => default_db_path(),
-    };
+    let path = db_path.map_or_else(default_db_path, std::path::PathBuf::from);
 
     // Ensure parent directory exists
     if let Some(parent) = path.parent() {
@@ -24,8 +23,12 @@ fn open_db(db_path: Option<&str>) -> Result<flow_db::Database> {
 
 pub fn list(db_path: Option<&str>) -> Result<()> {
     let db = open_db(db_path)?;
-    let conn = db.writer().lock().unwrap();
-    let features = FeatureStore::get_all(&conn).map_err(|e| anyhow::anyhow!("{e}"))?;
+    let (features, stats) = {
+        let conn = db.writer().lock().unwrap();
+        let features = FeatureStore::get_all(&conn).map_err(|e| anyhow::anyhow!("{e}"))?;
+        let stats = FeatureStore::get_stats(&conn).map_err(|e| anyhow::anyhow!("{e}"))?;
+        (features, stats)
+    };
 
     if features.is_empty() {
         ui::print_empty("No features found. Use 'flow features add' to create one.");
@@ -51,7 +54,7 @@ pub fn list(db_path: Option<&str>) -> Result<()> {
                 feature
                     .dependencies
                     .iter()
-                    .map(|d| d.to_string())
+                    .map(std::string::ToString::to_string)
                     .collect::<Vec<_>>()
                     .join(",")
             )
@@ -68,8 +71,6 @@ pub fn list(db_path: Option<&str>) -> Result<()> {
         );
     }
 
-    // Print summary
-    let stats = FeatureStore::get_stats(&conn).map_err(|e| anyhow::anyhow!("{e}"))?;
     println!(
         "\n  {} total, {} passing, {} in progress, {} blocked",
         stats.total.to_string().with(colors::WHITE),
@@ -83,26 +84,31 @@ pub fn list(db_path: Option<&str>) -> Result<()> {
 
 pub fn add(db_path: Option<&str>, name: &str, description: &str, category: &str) -> Result<()> {
     let db = open_db(db_path)?;
-    let conn = db.writer().lock().unwrap();
-
-    let input = flow_core::CreateFeatureInput {
-        name: name.to_string(),
-        description: description.to_string(),
-        priority: None,
-        category: category.to_string(),
-        steps: vec![],
-        dependencies: vec![],
+    let feature = {
+        let conn = db.writer().lock().unwrap();
+        let input = flow_core::CreateFeatureInput {
+            name: name.to_string(),
+            description: description.to_string(),
+            priority: None,
+            category: category.to_string(),
+            steps: vec![],
+            dependencies: vec![],
+        };
+        FeatureStore::create(&conn, &input).map_err(|e| anyhow::anyhow!("{e}"))?
     };
-
-    let feature = FeatureStore::create(&conn, &input).map_err(|e| anyhow::anyhow!("{e}"))?;
-    ui::print_success(&format!("Created feature #{}: {}", feature.id, feature.name));
+    ui::print_success(&format!(
+        "Created feature #{}: {}",
+        feature.id, feature.name
+    ));
     Ok(())
 }
 
 pub fn ready(db_path: Option<&str>) -> Result<()> {
     let db = open_db(db_path)?;
-    let conn = db.writer().lock().unwrap();
-    let features = FeatureStore::get_ready(&conn).map_err(|e| anyhow::anyhow!("{e}"))?;
+    let features = {
+        let conn = db.writer().lock().unwrap();
+        FeatureStore::get_ready(&conn).map_err(|e| anyhow::anyhow!("{e}"))?
+    };
 
     if features.is_empty() {
         ui::print_empty("No features ready to work on.");
@@ -124,36 +130,44 @@ pub fn ready(db_path: Option<&str>) -> Result<()> {
 
 pub fn claim(db_path: Option<&str>, id: i64) -> Result<()> {
     let db = open_db(db_path)?;
-    let conn = db.writer().lock().unwrap();
-    let feature =
-        FeatureStore::claim_and_get(&conn, id).map_err(|e| anyhow::anyhow!("{e}"))?;
-    ui::print_success(&format!("Claimed feature #{}: {}", feature.id, feature.name));
+    let feature = {
+        let conn = db.writer().lock().unwrap();
+        FeatureStore::claim_and_get(&conn, id).map_err(|e| anyhow::anyhow!("{e}"))?
+    };
+    ui::print_success(&format!(
+        "Claimed feature #{}: {}",
+        feature.id, feature.name
+    ));
     Ok(())
 }
 
 pub fn pass(db_path: Option<&str>, id: i64) -> Result<()> {
     let db = open_db(db_path)?;
-    let conn = db.writer().lock().unwrap();
-    FeatureStore::mark_passing(&conn, id).map_err(|e| anyhow::anyhow!("{e}"))?;
+    {
+        let conn = db.writer().lock().unwrap();
+        FeatureStore::mark_passing(&conn, id).map_err(|e| anyhow::anyhow!("{e}"))?;
+    }
     ui::print_success(&format!("Feature #{id} marked as passing"));
     Ok(())
 }
 
 pub fn fail(db_path: Option<&str>, id: i64) -> Result<()> {
     let db = open_db(db_path)?;
-    let conn = db.writer().lock().unwrap();
-    FeatureStore::mark_failing(&conn, id).map_err(|e| anyhow::anyhow!("{e}"))?;
+    {
+        let conn = db.writer().lock().unwrap();
+        FeatureStore::mark_failing(&conn, id).map_err(|e| anyhow::anyhow!("{e}"))?;
+    }
     ui::print_warning(&format!("Feature #{id} marked as failing"));
     Ok(())
 }
 
 pub fn graph(db_path: Option<&str>) -> Result<()> {
     let db = open_db(db_path)?;
-    let conn = db.writer().lock().unwrap();
-    let features = FeatureStore::get_all(&conn).map_err(|e| anyhow::anyhow!("{e}"))?;
-
-    let sorted =
-        flow_resolver::topological_sort(&features).map_err(|e| anyhow::anyhow!("{e}"))?;
+    let sorted = {
+        let conn = db.writer().lock().unwrap();
+        let features = FeatureStore::get_all(&conn).map_err(|e| anyhow::anyhow!("{e}"))?;
+        flow_resolver::topological_sort(&features).map_err(|e| anyhow::anyhow!("{e}"))?
+    };
 
     ui::print_section(icons::ARROW, "Dependency Graph (topological order)");
     for feature in &sorted {

@@ -7,7 +7,7 @@ rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords = ["sync", "state"]
+keywords = ["sync", "state", "ai-agent", "multi-machine", "replication"]
 categories = ["development-tools"]
 
 [dependencies]

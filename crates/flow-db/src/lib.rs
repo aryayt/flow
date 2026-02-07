@@ -1,3 +1,23 @@
+//! `SQLite` database layer for Agent Flow feature management.
+//!
+//! Provides thread-safe database access with WAL mode for concurrent reads,
+//! automatic schema migrations, and event logging for audit trails.
+//!
+//! # Architecture
+//!
+//! - Single write connection behind `Arc<Mutex<Connection>>` for thread safety
+//! - Read-only connection spawning for parallel queries
+//! - Automatic WAL mode and performance pragmas
+//!
+//! # Example
+//!
+//! ```rust,no_run
+//! use flow_db::Database;
+//!
+//! let db = Database::open(std::path::Path::new("flow.db")).unwrap();
+//! let features = flow_db::FeatureStore::get_all(&db.writer().lock().unwrap()).unwrap();
+//! ```
+
 pub mod event_log;
 pub mod feature;
 pub mod migration;
@@ -21,9 +41,8 @@ impl Database {
     /// Open a database at the specified path, creating it if necessary.
     /// Runs migrations and applies performance optimizations.
     pub fn open(path: &Path) -> Result<Self> {
-        let conn = Connection::open(path).map_err(|e| {
-            flow_core::FlowError::Database(format!("failed to open database: {e}"))
-        })?;
+        let conn = Connection::open(path)
+            .map_err(|e| flow_core::FlowError::Database(format!("failed to open database: {e}")))?;
 
         schema::init_connection(&conn)?;
         migration::run_migrations(&conn)?;
@@ -62,13 +81,13 @@ impl Database {
             ));
         }
 
-        let conn = Connection::open_with_flags(
-            &self.db_path,
-            rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
-        )
-        .map_err(|e| {
-            flow_core::FlowError::Database(format!("failed to open read-only connection: {e}"))
-        })?;
+        let conn =
+            Connection::open_with_flags(&self.db_path, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
+                .map_err(|e| {
+                    flow_core::FlowError::Database(format!(
+                        "failed to open read-only connection: {e}"
+                    ))
+                })?;
 
         schema::init_connection(&conn)?;
         Ok(conn)
@@ -76,6 +95,7 @@ impl Database {
 }
 
 #[cfg(test)]
+#[allow(clippy::significant_drop_tightening)]
 mod tests {
     use super::*;
 

@@ -31,14 +31,12 @@ pub fn setup_file_watcher(
 
     // Tasks watcher
     let tx_tasks = tx.clone();
-    let tasks_watcher_result = notify::recommended_watcher(
-        move |res: Result<notify::Event, notify::Error>| {
+    let tasks_watcher_result =
+        notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
             if let Ok(event) = res {
                 for path in &event.paths {
                     if path.extension().is_some_and(|e| e == "json") {
-                        let relative = path
-                            .strip_prefix(&tasks_dir_clone)
-                            .unwrap_or(path);
+                        let relative = path.strip_prefix(&tasks_dir_clone).unwrap_or(path);
                         let session_id = relative
                             .components()
                             .next()
@@ -68,8 +66,7 @@ pub fn setup_file_watcher(
                     }
                 }
             }
-        },
-    );
+        });
 
     let mut tasks_watcher = match tasks_watcher_result {
         Ok(w) => w,
@@ -96,8 +93,8 @@ pub fn setup_file_watcher(
 
     // Projects watcher (for metadata changes)
     let tx_projects = tx;
-    let projects_watcher_result = notify::recommended_watcher(
-        move |res: Result<notify::Event, notify::Error>| {
+    let projects_watcher_result =
+        notify::recommended_watcher(move |res: Result<notify::Event, notify::Error>| {
             if let Ok(event) = res {
                 for path in &event.paths {
                     if path.extension().is_some_and(|e| e == "jsonl") {
@@ -106,8 +103,7 @@ pub fn setup_file_watcher(
                     }
                 }
             }
-        },
-    );
+        });
 
     let mut projects_watcher = match projects_watcher_result {
         Ok(w) => w,

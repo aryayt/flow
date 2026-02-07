@@ -8,8 +8,8 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 readme = "README.md"
-keywords = ["sqlite", "database", "features", "crud"]
-categories = ["database"]
+keywords = ["sqlite", "database", "ai-agent", "features", "crud"]
+categories = ["database", "development-tools"]
 
 [dependencies]
 agentflow-core = { workspace = true }

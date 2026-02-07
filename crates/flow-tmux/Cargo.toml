@@ -7,8 +7,8 @@ rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords = ["tmux", "terminal", "session"]
-categories = ["development-tools"]
+keywords = ["tmux", "terminal", "session", "ai-agent", "multiplexer"]
+categories = ["development-tools", "command-line-utilities"]
 
 [dependencies]
 agentflow-core = { workspace = true }

@@ -112,13 +112,9 @@ pub fn run(all: bool) -> Result<()> {
 
 fn which_command(cmd: &str) -> bool {
     #[cfg(windows)]
-    let result = std::process::Command::new("where.exe")
-        .arg(cmd)
-        .output();
+    let result = std::process::Command::new("where.exe").arg(cmd).output();
     #[cfg(not(windows))]
-    let result = std::process::Command::new("which")
-        .arg(cmd)
-        .output();
+    let result = std::process::Command::new("which").arg(cmd).output();
     result.is_ok_and(|o| o.status.success())
 }
 

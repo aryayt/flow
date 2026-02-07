@@ -1,3 +1,8 @@
+//! Multi-machine state synchronization for Agent Flow.
+//!
+//! Synchronizes workspace state across machines using pluggable providers
+//! (git-based sync, file-based sync). Currently a work-in-progress.
+
 pub mod git_provider;
 pub mod provider;
 

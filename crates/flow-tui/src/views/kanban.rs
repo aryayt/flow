@@ -64,7 +64,11 @@ fn render_column(
         .title(format!("{} ({})", title, features.len()))
         .borders(Borders::ALL)
         .border_style(Style::default().fg(theme.border))
-        .title_style(Style::default().fg(title_color).add_modifier(Modifier::BOLD));
+        .title_style(
+            Style::default()
+                .fg(title_color)
+                .add_modifier(Modifier::BOLD),
+        );
 
     let inner = block.inner(area);
     frame.render_widget(block, area);
@@ -80,14 +84,12 @@ fn render_column(
     // Create list items for features
     let items: Vec<ListItem> = features
         .iter()
-        .enumerate()
-        .map(|(_idx, feature)| {
+        .map(|feature| {
             let is_selected = app
                 .features
                 .iter()
                 .position(|f| f.id == feature.id)
-                .map(|pos| pos == app.selected_index)
-                .unwrap_or(false);
+                .is_some_and(|pos| pos == app.selected_index);
 
             let status_color = if !feature.passes && !feature.in_progress {
                 theme.pending
@@ -99,7 +101,7 @@ fn render_column(
 
             let mut lines = vec![
                 Line::from(vec![
-                    Span::styled(format!("{} ", status_icon), Style::default().fg(status_color)),
+                    Span::styled(format!("{status_icon} "), Style::default().fg(status_color)),
                     Span::styled(
                         &feature.name,
                         Style::default()
@@ -135,8 +137,7 @@ fn render_column(
                     app.features
                         .iter()
                         .find(|f| f.id == *dep_id)
-                        .map(|f| f.passes)
-                        .unwrap_or(false)
+                        .is_some_and(|f| f.passes)
                 });
                 if !satisfied {
                     lines.push(Line::from(Span::styled(

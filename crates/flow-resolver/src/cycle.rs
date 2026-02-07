@@ -18,10 +18,7 @@ pub fn would_create_cycle(feature_id: i64, new_dep_id: i64, features: &[Feature]
     }
 
     // Add the hypothetical new dependency
-    deps_map
-        .entry(feature_id)
-        .or_default()
-        .push(new_dep_id);
+    deps_map.entry(feature_id).or_default().push(new_dep_id);
 
     // DFS from new_dep_id following dependency edges
     // If we reach feature_id, adding this dep would create a cycle

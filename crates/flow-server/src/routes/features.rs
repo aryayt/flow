@@ -1,4 +1,7 @@
-use crate::{error::{AppError, AppResult}, state::AppState};
+use crate::{
+    error::{AppError, AppResult},
+    state::AppState,
+};
 use axum::{
     extract::{Path, State},
     response::Json,
@@ -14,7 +17,6 @@ use std::sync::Arc;
 pub struct BulkCreateRequest {
     features: Vec<CreateFeatureInput>,
 }
-
 
 /// Build the feature routes sub-router
 pub fn feature_routes() -> Router<Arc<AppState>> {
@@ -35,12 +37,11 @@ pub fn feature_routes() -> Router<Arc<AppState>> {
 }
 
 /// GET /api/features — List all features
-async fn list_features(
-    State(state): State<Arc<AppState>>,
-) -> AppResult<Json<Vec<Feature>>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+async fn list_features(State(state): State<Arc<AppState>>) -> AppResult<Json<Vec<Feature>>> {
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
     let features = {
         let conn = db.writer().lock().unwrap();
@@ -54,13 +55,14 @@ async fn get_feature_by_id(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> AppResult<Json<Feature>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
-    let id_num: i64 = id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid feature ID".into())
-    })?;
+    let id_num: i64 = id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid feature ID".into()))?;
 
     let feature = {
         let conn = db.writer().lock().unwrap();
@@ -71,12 +73,11 @@ async fn get_feature_by_id(
 }
 
 /// GET /api/features/stats — Get feature statistics
-async fn get_stats(
-    State(state): State<Arc<AppState>>,
-) -> AppResult<Json<FeatureStats>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+async fn get_stats(State(state): State<Arc<AppState>>) -> AppResult<Json<FeatureStats>> {
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
     let feature_stats = {
         let conn = db.writer().lock().unwrap();
@@ -86,12 +87,11 @@ async fn get_stats(
 }
 
 /// GET /api/features/ready — Get ready features
-async fn get_ready(
-    State(state): State<Arc<AppState>>,
-) -> AppResult<Json<Vec<Feature>>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+async fn get_ready(State(state): State<Arc<AppState>>) -> AppResult<Json<Vec<Feature>>> {
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
     let features = {
         let conn = db.writer().lock().unwrap();
@@ -101,12 +101,11 @@ async fn get_ready(
 }
 
 /// GET /api/features/blocked — Get blocked features
-async fn get_blocked(
-    State(state): State<Arc<AppState>>,
-) -> AppResult<Json<Vec<Feature>>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+async fn get_blocked(State(state): State<Arc<AppState>>) -> AppResult<Json<Vec<Feature>>> {
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
     let features = {
         let conn = db.writer().lock().unwrap();
@@ -116,12 +115,11 @@ async fn get_blocked(
 }
 
 /// GET /api/features/graph — Get dependency graph
-async fn get_graph(
-    State(state): State<Arc<AppState>>,
-) -> AppResult<Json<Vec<FeatureGraphNode>>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+async fn get_graph(State(state): State<Arc<AppState>>) -> AppResult<Json<Vec<FeatureGraphNode>>> {
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
     let features = {
         let conn = db.writer().lock().unwrap();
@@ -129,7 +127,8 @@ async fn get_graph(
     };
 
     // Build reverse dependency map (dependents)
-    let mut dependents_map: std::collections::HashMap<i64, Vec<i64>> = std::collections::HashMap::new();
+    let mut dependents_map: std::collections::HashMap<i64, Vec<i64>> =
+        std::collections::HashMap::new();
     for feature in &features {
         for &dep_id in &feature.dependencies {
             dependents_map.entry(dep_id).or_default().push(feature.id);
@@ -143,9 +142,11 @@ async fn get_graph(
     let graph: Vec<FeatureGraphNode> = features
         .into_iter()
         .map(|f| {
-            let is_blocked = !f.dependencies.is_empty() &&
-                f.dependencies.iter().any(|dep_id| {
-                    features_for_check.iter().any(|other| other.id == *dep_id && !other.passes)
+            let is_blocked = !f.dependencies.is_empty()
+                && f.dependencies.iter().any(|dep_id| {
+                    features_for_check
+                        .iter()
+                        .any(|other| other.id == *dep_id && !other.passes)
                 });
 
             FeatureGraphNode {
@@ -170,9 +171,10 @@ async fn create_feature(
     State(state): State<Arc<AppState>>,
     Json(input): Json<CreateFeatureInput>,
 ) -> AppResult<Json<Feature>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
     let feature = {
         let conn = db.writer().lock().unwrap();
@@ -186,9 +188,10 @@ async fn bulk_create(
     State(state): State<Arc<AppState>>,
     Json(request): Json<BulkCreateRequest>,
 ) -> AppResult<Json<Vec<Feature>>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
     let features = {
         let conn = db.writer().lock().unwrap();
@@ -202,13 +205,14 @@ async fn claim_feature(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> AppResult<Json<Feature>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
-    let id_num: i64 = id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid feature ID".into())
-    })?;
+    let id_num: i64 = id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid feature ID".into()))?;
 
     let feature = {
         let conn = db.writer().lock().unwrap();
@@ -222,13 +226,14 @@ async fn mark_passing(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> AppResult<Json<serde_json::Value>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
-    let id_num: i64 = id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid feature ID".into())
-    })?;
+    let id_num: i64 = id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid feature ID".into()))?;
 
     let conn = db.writer().lock().unwrap();
     FeatureStore::mark_passing(&conn, id_num)?;
@@ -240,13 +245,14 @@ async fn mark_failing(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> AppResult<Json<serde_json::Value>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
-    let id_num: i64 = id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid feature ID".into())
-    })?;
+    let id_num: i64 = id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid feature ID".into()))?;
 
     let conn = db.writer().lock().unwrap();
     FeatureStore::mark_failing(&conn, id_num)?;
@@ -258,13 +264,14 @@ async fn skip_feature(
     State(state): State<Arc<AppState>>,
     Path(id): Path<String>,
 ) -> AppResult<Json<serde_json::Value>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
-    let id_num: i64 = id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid feature ID".into())
-    })?;
+    let id_num: i64 = id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid feature ID".into()))?;
 
     let conn = db.writer().lock().unwrap();
     FeatureStore::skip(&conn, id_num)?;
@@ -277,13 +284,14 @@ async fn add_dependency(
     Path(id): Path<String>,
     Json(dep): Json<DependencyRef>,
 ) -> AppResult<Json<serde_json::Value>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
-    let id_num: i64 = id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid feature ID".into())
-    })?;
+    let id_num: i64 = id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid feature ID".into()))?;
 
     // Extract the dependency ID from `DependencyRef`
     let DependencyRef::Id(dep_id) = dep else {
@@ -300,17 +308,18 @@ async fn remove_dependency(
     State(state): State<Arc<AppState>>,
     Path((id, dep_id)): Path<(String, String)>,
 ) -> AppResult<Json<serde_json::Value>> {
-    let db = state.db.as_ref().ok_or_else(|| {
-        AppError::Internal("Database not configured".into())
-    })?;
+    let db = state
+        .db
+        .as_ref()
+        .ok_or_else(|| AppError::Internal("Database not configured".into()))?;
 
-    let id_num: i64 = id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid feature ID".into())
-    })?;
+    let id_num: i64 = id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid feature ID".into()))?;
 
-    let dep_id_num: i64 = dep_id.parse().map_err(|_| {
-        AppError::BadRequest("Invalid dependency ID".into())
-    })?;
+    let dep_id_num: i64 = dep_id
+        .parse()
+        .map_err(|_| AppError::BadRequest("Invalid dependency ID".into()))?;
 
     let conn = db.writer().lock().unwrap();
     FeatureStore::remove_dependency(&conn, id_num, dep_id_num)?;

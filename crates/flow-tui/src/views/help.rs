@@ -32,9 +32,12 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     let help_text = vec![
         Line::from(""),
-        Line::from(vec![
-            Span::styled("Views:", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
-        ]),
+        Line::from(vec![Span::styled(
+            "Views:",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        )]),
         Line::from(vec![
             Span::styled("  1       ", Style::default().fg(theme.accent)),
             Span::styled("Kanban board view", Style::default().fg(theme.foreground)),
@@ -56,9 +59,12 @@ pub fn render(frame: &mut Frame, app: &App) {
             Span::styled("Cycle through views", Style::default().fg(theme.foreground)),
         ]),
         Line::from(""),
-        Line::from(vec![
-            Span::styled("Navigation:", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
-        ]),
+        Line::from(vec![Span::styled(
+            "Navigation:",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        )]),
         Line::from(vec![
             Span::styled("  j/Down  ", Style::default().fg(theme.accent)),
             Span::styled("Next item", Style::default().fg(theme.foreground)),
@@ -68,9 +74,12 @@ pub fn render(frame: &mut Frame, app: &App) {
             Span::styled("Previous item", Style::default().fg(theme.foreground)),
         ]),
         Line::from(""),
-        Line::from(vec![
-            Span::styled("Other:", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
-        ]),
+        Line::from(vec![Span::styled(
+            "Other:",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        )]),
         Line::from(vec![
             Span::styled("  t       ", Style::default().fg(theme.accent)),
             Span::styled("Cycle theme", Style::default().fg(theme.foreground)),
@@ -84,12 +93,12 @@ pub fn render(frame: &mut Frame, app: &App) {
             Span::styled("Quit", Style::default().fg(theme.foreground)),
         ]),
         Line::from(""),
-        Line::from(vec![
-            Span::styled(
-                "Press any key to close",
-                Style::default().fg(theme.muted).add_modifier(Modifier::ITALIC),
-            ),
-        ]),
+        Line::from(vec![Span::styled(
+            "Press any key to close",
+            Style::default()
+                .fg(theme.muted)
+                .add_modifier(Modifier::ITALIC),
+        )]),
     ];
 
     let paragraph = Paragraph::new(help_text)

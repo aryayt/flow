@@ -14,7 +14,11 @@ pub fn render(frame: &mut Frame, app: &App) {
         .title("Dependency Graph")
         .borders(Borders::ALL)
         .border_style(Style::default().fg(theme.border))
-        .title_style(Style::default().fg(theme.primary).add_modifier(Modifier::BOLD));
+        .title_style(
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        );
 
     let inner = block.inner(area);
     frame.render_widget(block, area);
@@ -51,8 +55,7 @@ pub fn render(frame: &mut Frame, app: &App) {
                 app.features
                     .iter()
                     .find(|f| f.id == *dep_id)
-                    .map(|f| !f.passes)
-                    .unwrap_or(true)
+                    .is_none_or(|f| !f.passes)
             });
 
         let border_color = if is_blocked {
@@ -67,7 +70,9 @@ pub fn render(frame: &mut Frame, app: &App) {
                 Span::styled("┌─", Style::default().fg(border_color)),
                 Span::styled(
                     format!(" {} {} ", icon, feature.name),
-                    Style::default().fg(status_color).add_modifier(Modifier::BOLD),
+                    Style::default()
+                        .fg(status_color)
+                        .add_modifier(Modifier::BOLD),
                 ),
                 Span::styled("─┐", Style::default().fg(border_color)),
             ]),
@@ -97,7 +102,7 @@ pub fn render(frame: &mut Frame, app: &App) {
                     items.push(ListItem::new(Line::from(vec![
                         Span::styled("  ↓ ", Style::default().fg(theme.accent)),
                         Span::styled(
-                            format!("{} depends on: ", dep_status),
+                            format!("{dep_status} depends on: "),
                             Style::default().fg(theme.muted),
                         ),
                         Span::styled(&dep.name, Style::default().fg(theme.foreground)),

@@ -1,10 +1,10 @@
-use std::io;
 use crossterm::{
     event::{self, Event},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
+use std::io;
 
 fn main() -> io::Result<()> {
     enable_raw_mode()?;

@@ -7,7 +7,7 @@ rust-version.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
-keywords = ["git", "worktree"]
+keywords = ["git", "worktree", "ai-agent", "branch", "workflow"]
 categories = ["development-tools"]
 
 [dependencies]

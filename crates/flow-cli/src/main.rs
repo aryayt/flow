@@ -1,3 +1,9 @@
+//! Agent Flow CLI — git worktree workflow manager with AI agent monitoring.
+//!
+//! Install: `cargo install agentflow-cli`
+//!
+//! Usage: `flow [COMMAND]`
+
 mod commands;
 mod ui;
 
@@ -62,7 +68,7 @@ enum Commands {
         #[arg(long)]
         public_dir: Option<String>,
     },
-    /// Manage features in the SQLite database
+    /// Manage features in the `SQLite` database
     Features {
         #[command(subcommand)]
         action: FeatureAction,

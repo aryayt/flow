@@ -37,6 +37,12 @@ pub struct App {
     pub log_messages: Vec<String>,
 }
 
+impl Default for App {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl App {
     pub fn new() -> Self {
         let theme = Theme::default();
@@ -172,6 +178,7 @@ impl App {
         }
     }
 
+    #[allow(clippy::too_many_lines)]
     pub fn load_demo_data(&mut self) {
         // Create demo features for testing
         self.features = vec![
@@ -215,7 +222,10 @@ impl App {
                 category: "Backend".to_string(),
                 name: "API Rate Limiting".to_string(),
                 description: "Add rate limiting middleware".to_string(),
-                steps: vec!["Research solutions".to_string(), "Implement middleware".to_string()],
+                steps: vec![
+                    "Research solutions".to_string(),
+                    "Implement middleware".to_string(),
+                ],
                 passes: false,
                 in_progress: true,
                 dependencies: vec![1],
@@ -262,7 +272,10 @@ impl App {
                 category: "Backend".to_string(),
                 name: "Email Notifications".to_string(),
                 description: "Send email notifications for events".to_string(),
-                steps: vec!["Setup email service".to_string(), "Create templates".to_string()],
+                steps: vec![
+                    "Setup email service".to_string(),
+                    "Create templates".to_string(),
+                ],
                 passes: true,
                 in_progress: false,
                 dependencies: vec![1],
@@ -275,7 +288,10 @@ impl App {
                 category: "DevOps".to_string(),
                 name: "Docker Setup".to_string(),
                 description: "Containerize application".to_string(),
-                steps: vec!["Create Dockerfile".to_string(), "Setup docker-compose".to_string()],
+                steps: vec![
+                    "Create Dockerfile".to_string(),
+                    "Setup docker-compose".to_string(),
+                ],
                 passes: true,
                 in_progress: false,
                 dependencies: vec![],
@@ -288,7 +304,10 @@ impl App {
                 category: "Frontend".to_string(),
                 name: "Settings Page".to_string(),
                 description: "User settings and preferences".to_string(),
-                steps: vec!["Design UI".to_string(), "Implement form handling".to_string()],
+                steps: vec![
+                    "Design UI".to_string(),
+                    "Implement form handling".to_string(),
+                ],
                 passes: true,
                 in_progress: false,
                 dependencies: vec![1, 2],

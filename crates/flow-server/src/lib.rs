@@ -1,3 +1,17 @@
+//! High-performance web server for Agent Flow task monitoring.
+//!
+//! Built on [axum](https://docs.rs/axum) with real-time updates via
+//! Server-Sent Events (SSE) and WebSocket connections. Watches the
+//! filesystem for task changes and broadcasts updates to all connected clients.
+//!
+//! # Features
+//!
+//! - REST API for sessions, tasks, and features
+//! - SSE and WebSocket endpoints for live updates
+//! - File watcher using the `notify` crate
+//! - Optional `SQLite` database for feature management
+//! - Static file serving for the web UI
+
 pub mod error;
 pub mod helpers;
 pub mod routes;
@@ -9,7 +23,10 @@ pub mod ws;
 pub use error::{AppError, AppResult};
 pub use state::{AppState, MetadataCache};
 
-use axum::{routing::{delete, get, post}, Router};
+use axum::{
+    routing::{delete, get, post},
+    Router,
+};
 use flow_core::AgentConfig;
 use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
@@ -20,10 +37,19 @@ use tracing::info;
 pub fn build_router(state: Arc<AppState>) -> Router {
     let mut app = Router::new()
         .route("/api/sessions", get(routes::sessions::list_sessions))
-        .route("/api/sessions/:session_id", get(routes::sessions::get_session))
+        .route(
+            "/api/sessions/:session_id",
+            get(routes::sessions::get_session),
+        )
         .route("/api/tasks/all", get(routes::tasks::get_all_tasks))
-        .route("/api/tasks/:session_id/:task_id/note", post(routes::tasks::add_note))
-        .route("/api/tasks/:session_id/:task_id", delete(routes::tasks::delete_task))
+        .route(
+            "/api/tasks/:session_id/:task_id/note",
+            post(routes::tasks::add_note),
+        )
+        .route(
+            "/api/tasks/:session_id/:task_id",
+            delete(routes::tasks::delete_task),
+        )
         .route("/api/events", get(sse::sse_handler))
         .route("/api/ws", get(ws::ws_handler))
         .route("/api/theme", get(routes::theme::get_theme))
@@ -88,8 +114,7 @@ pub async fn run_server(config: AgentConfig) -> flow_core::Result<()> {
     let _watchers = watcher::setup_file_watcher(&tasks_dir, &projects_dir, tx);
 
     // Build router with fallback to serve static files
-    let app = build_router(state.clone())
-        .fallback_service(ServeDir::new(&public_dir));
+    let app = build_router(state.clone()).fallback_service(ServeDir::new(&public_dir));
 
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.port));
     info!("Server running at http://localhost:{}", config.port);

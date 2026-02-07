@@ -7,9 +7,7 @@ const CURRENT_VERSION: i32 = 1;
 pub fn run_migrations(conn: &Connection) -> Result<()> {
     let version: i32 = conn
         .pragma_query_value(None, "user_version", |row| row.get(0))
-        .map_err(|e| {
-            flow_core::FlowError::Database(format!("failed to get user_version: {e}"))
-        })?;
+        .map_err(|e| flow_core::FlowError::Database(format!("failed to get user_version: {e}")))?;
 
     if version < 1 {
         migrate_v1(conn)?;
@@ -43,9 +41,7 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
         ",
         [],
     )
-    .map_err(|e| {
-        flow_core::FlowError::Database(format!("failed to create features table: {e}"))
-    })?;
+    .map_err(|e| flow_core::FlowError::Database(format!("failed to create features table: {e}")))?;
 
     // Create change_events table
     conn.execute(
@@ -74,25 +70,19 @@ fn migrate_v1(conn: &Connection) -> Result<()> {
         "CREATE INDEX IF NOT EXISTS ix_feature_status ON features(passes, in_progress)",
         [],
     )
-    .map_err(|e| {
-        flow_core::FlowError::Database(format!("failed to create status index: {e}"))
-    })?;
+    .map_err(|e| flow_core::FlowError::Database(format!("failed to create status index: {e}")))?;
 
     conn.execute(
         "CREATE INDEX IF NOT EXISTS ix_feature_priority ON features(priority)",
         [],
     )
-    .map_err(|e| {
-        flow_core::FlowError::Database(format!("failed to create priority index: {e}"))
-    })?;
+    .map_err(|e| flow_core::FlowError::Database(format!("failed to create priority index: {e}")))?;
 
     conn.execute(
         "CREATE INDEX IF NOT EXISTS ix_change_events_feature ON change_events(feature_id)",
         [],
     )
-    .map_err(|e| {
-        flow_core::FlowError::Database(format!("failed to create events index: {e}"))
-    })?;
+    .map_err(|e| flow_core::FlowError::Database(format!("failed to create events index: {e}")))?;
 
     // Update version
     conn.pragma_update(None, "user_version", CURRENT_VERSION)
@@ -154,10 +144,10 @@ mod tests {
 
         // Verify we can insert and retrieve a feature
         conn.execute(
-            r#"
+            r"
             INSERT INTO features (name, description, priority, category, steps, dependencies)
             VALUES (?, ?, ?, ?, ?, ?)
-            "#,
+            ",
             rusqlite::params![
                 "Test Feature",
                 "Test Description",
@@ -170,9 +160,11 @@ mod tests {
         .unwrap();
 
         let (name, deps): (String, String) = conn
-            .query_row("SELECT name, dependencies FROM features WHERE id = 1", [], |row| {
-                Ok((row.get(0)?, row.get(1)?))
-            })
+            .query_row(
+                "SELECT name, dependencies FROM features WHERE id = 1",
+                [],
+                |row| Ok((row.get(0)?, row.get(1)?)),
+            )
             .unwrap();
 
         assert_eq!(name, "Test Feature");

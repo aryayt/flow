@@ -14,7 +14,11 @@ pub fn render(frame: &mut Frame, app: &App) {
         .title(format!("Logs ({} messages)", app.log_messages.len()))
         .borders(Borders::ALL)
         .border_style(Style::default().fg(theme.border))
-        .title_style(Style::default().fg(theme.primary).add_modifier(Modifier::BOLD));
+        .title_style(
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        );
 
     let inner = block.inner(area);
     frame.render_widget(block, area);

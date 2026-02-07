@@ -1,7 +1,7 @@
 use flow_core::{AnsiColor, ThemeColors};
 use ratatui::style::Color;
 
-pub fn to_ratatui_color(ansi: &AnsiColor) -> Color {
+pub const fn to_ratatui_color(ansi: &AnsiColor) -> Color {
     Color::Indexed(ansi.0)
 }
 

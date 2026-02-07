@@ -9,7 +9,7 @@ license.workspace = true
 repository.workspace = true
 readme = "README.md"
 homepage = "https://github.com/aryayt/flow"
-keywords = ["git", "worktree", "tmux", "cli", "workflow"]
+keywords = ["ai-agent", "git-worktree", "tmux", "cli", "workflow"]
 categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]

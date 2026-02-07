@@ -16,27 +16,19 @@ pub fn init_connection(conn: &Connection) -> Result<()> {
 
     // Cache size: 64MB (negative value means kibibytes)
     conn.pragma_update(None, "cache_size", -64000)
-        .map_err(|e| {
-            flow_core::FlowError::Database(format!("failed to set cache size: {e}"))
-        })?;
+        .map_err(|e| flow_core::FlowError::Database(format!("failed to set cache size: {e}")))?;
 
     // Store temp tables in memory for speed
     conn.pragma_update(None, "temp_store", "MEMORY")
-        .map_err(|e| {
-            flow_core::FlowError::Database(format!("failed to set temp_store: {e}"))
-        })?;
+        .map_err(|e| flow_core::FlowError::Database(format!("failed to set temp_store: {e}")))?;
 
     // Enable memory-mapped I/O (30GB max)
     conn.pragma_update(None, "mmap_size", 30_000_000_000_i64)
-        .map_err(|e| {
-            flow_core::FlowError::Database(format!("failed to set mmap_size: {e}"))
-        })?;
+        .map_err(|e| flow_core::FlowError::Database(format!("failed to set mmap_size: {e}")))?;
 
     // Set busy handler: retry up to 100 times with 10ms sleep
     conn.busy_timeout(Duration::from_millis(1000))
-        .map_err(|e| {
-            flow_core::FlowError::Database(format!("failed to set busy timeout: {e}"))
-        })?;
+        .map_err(|e| flow_core::FlowError::Database(format!("failed to set busy timeout: {e}")))?;
 
     Ok(())
 }

@@ -8,8 +8,8 @@ authors.workspace = true
 license.workspace = true
 repository.workspace = true
 readme = "README.md"
-keywords = ["workflow", "types", "configuration", "themes"]
-categories = ["development-tools"]
+keywords = ["ai-agent", "orchestration", "workflow", "task-management", "configuration"]
+categories = ["development-tools", "command-line-utilities"]
 
 [lib]
 name = "flow_core"

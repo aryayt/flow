@@ -7,6 +7,7 @@ use ratatui::{
     Frame,
 };
 
+#[allow(clippy::too_many_lines)]
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
     let theme = &app.tui_theme;
@@ -15,7 +16,11 @@ pub fn render(frame: &mut Frame, app: &App) {
         .title("Agent Dashboard")
         .borders(Borders::ALL)
         .border_style(Style::default().fg(theme.border))
-        .title_style(Style::default().fg(theme.primary).add_modifier(Modifier::BOLD));
+        .title_style(
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        );
 
     let inner = block.inner(area);
     frame.render_widget(block, area);
@@ -30,6 +35,7 @@ pub fn render(frame: &mut Frame, app: &App) {
         .filter(|f| !f.passes && !f.in_progress)
         .count();
 
+    #[allow(clippy::cast_precision_loss)]
     let progress_ratio = if total > 0 {
         passing as f64 / total as f64
     } else {
@@ -61,11 +67,11 @@ pub fn render(frame: &mut Frame, app: &App) {
     // Agent counts (placeholder)
     let agent_info = Paragraph::new(vec![Line::from(vec![
         Span::styled(
-            format!("Coding Agents: {}/5     ", in_progress),
+            format!("Coding Agents: {in_progress}/5     "),
             Style::default().fg(theme.in_progress),
         ),
         Span::styled(
-            format!("Testing Agents: 1/5"),
+            "Testing Agents: 1/5".to_string(),
             Style::default().fg(theme.secondary),
         ),
     ])])
