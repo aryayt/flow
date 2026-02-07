@@ -4,7 +4,7 @@ use crossterm::style::Stylize;
 
 #[allow(clippy::unnecessary_wraps)]
 pub fn run(all: bool) -> Result<()> {
-    ui::print_header("  Security Scan  ");
+    ui::print_header("  Security Audit  ");
 
     println!(
         "\n{} {}",

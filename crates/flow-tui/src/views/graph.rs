@@ -1,14 +1,27 @@
 use crate::app::App;
 use ratatui::{
+    layout::{Constraint, Direction, Layout},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem},
+    widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
 
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
     let theme = &app.tui_theme;
+
+    // Split main area into graph and footer
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Min(0),    // Graph
+            Constraint::Length(1), // Footer
+        ])
+        .split(area);
+
+    let graph_area = chunks[0];
+    let footer_area = chunks[1];
 
     let block = Block::default()
         .title("Dependency Graph")
@@ -20,8 +33,8 @@ pub fn render(frame: &mut Frame, app: &App) {
                 .add_modifier(Modifier::BOLD),
         );
 
-    let inner = block.inner(area);
-    frame.render_widget(block, area);
+    let inner = block.inner(graph_area);
+    frame.render_widget(block, graph_area);
 
     if app.features.is_empty() {
         return;
@@ -116,4 +129,14 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     let list = List::new(items);
     frame.render_widget(list, inner);
+
+    // Render footer with key hints
+    let footer_text = if let Some(status) = app.get_status_message() {
+        status.to_string()
+    } else {
+        " 1-4:views  r:refresh  t:theme  ?:help  q:quit".to_string()
+    };
+
+    let footer = Paragraph::new(footer_text).style(Style::default().fg(theme.muted));
+    frame.render_widget(footer, footer_area);
 }

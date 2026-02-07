@@ -12,6 +12,18 @@ pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
     let theme = &app.tui_theme;
 
+    // Split main area into dashboard and footer
+    let chunks_outer = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Min(0),    // Dashboard
+            Constraint::Length(1), // Footer
+        ])
+        .split(area);
+
+    let dashboard_area = chunks_outer[0];
+    let footer_area = chunks_outer[1];
+
     let block = Block::default()
         .title("Agent Dashboard")
         .borders(Borders::ALL)
@@ -22,18 +34,23 @@ pub fn render(frame: &mut Frame, app: &App) {
                 .add_modifier(Modifier::BOLD),
         );
 
-    let inner = block.inner(area);
-    frame.render_widget(block, area);
+    let inner = block.inner(dashboard_area);
+    frame.render_widget(block, dashboard_area);
 
-    // Calculate stats
-    let total = app.features.len();
-    let passing = app.features.iter().filter(|f| f.passes).count();
-    let in_progress = app.features.iter().filter(|f| f.in_progress).count();
-    let _pending = app
-        .features
-        .iter()
-        .filter(|f| !f.passes && !f.in_progress)
-        .count();
+    // Use real stats from database if available, otherwise calculate from features
+    let (total, passing, in_progress, _pending) = if let Some(ref stats) = app.feature_stats {
+        (stats.total, stats.passing, stats.in_progress, stats.failing)
+    } else {
+        let total = app.features.len();
+        let passing = app.features.iter().filter(|f| f.passes).count();
+        let in_progress = app.features.iter().filter(|f| f.in_progress).count();
+        let pending = app
+            .features
+            .iter()
+            .filter(|f| !f.passes && !f.in_progress)
+            .count();
+        (total, passing, in_progress, pending)
+    };
 
     #[allow(clippy::cast_precision_loss)]
     let progress_ratio = if total > 0 {
@@ -123,4 +140,14 @@ pub fn render(frame: &mut Frame, app: &App) {
     ])
     .alignment(Alignment::Left);
     frame.render_widget(activity, chunks[4]);
+
+    // Render footer with key hints
+    let footer_text = if let Some(status) = app.get_status_message() {
+        status.to_string()
+    } else {
+        " 1-4:views  r:refresh  t:theme  ?:help  q:quit".to_string()
+    };
+
+    let footer = Paragraph::new(footer_text).style(Style::default().fg(theme.muted));
+    frame.render_widget(footer, footer_area);
 }

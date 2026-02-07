@@ -15,7 +15,7 @@ members = [
 ]
 
 [workspace.package]
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 rust-version = "1.82"
 authors = ["Arya <universitybuddyai@gmail.com>"]
@@ -24,16 +24,16 @@ repository = "https://github.com/aryayt/flow"
 
 [workspace.dependencies]
 # Internal crates
-agentflow-core = { path = "crates/flow-core", version = "0.1.1" }
-flow-db = { path = "crates/flow-db", version = "0.1.1" }
-flow-resolver = { path = "crates/flow-resolver", version = "0.1.1" }
-flow-server = { path = "crates/flow-server", version = "0.1.1" }
-flow-mcp = { path = "crates/flow-mcp", version = "0.1.1" }
-flow-orchestrator = { path = "crates/flow-orchestrator", version = "0.1.1" }
-flow-git = { path = "crates/flow-git", version = "0.1.1" }
-flow-tmux = { path = "crates/flow-tmux", version = "0.1.1" }
-flow-sync = { path = "crates/flow-sync", version = "0.1.1" }
-flow-tui = { path = "crates/flow-tui", version = "0.1.1" }
+agentflow-core = { path = "crates/flow-core", version = "0.1.2" }
+flow-db = { path = "crates/flow-db", version = "0.1.2" }
+flow-resolver = { path = "crates/flow-resolver", version = "0.1.2" }
+flow-server = { path = "crates/flow-server", version = "0.1.2" }
+flow-mcp = { path = "crates/flow-mcp", version = "0.1.2" }
+flow-orchestrator = { path = "crates/flow-orchestrator", version = "0.1.2" }
+flow-git = { path = "crates/flow-git", version = "0.1.2" }
+flow-tmux = { path = "crates/flow-tmux", version = "0.1.2" }
+flow-sync = { path = "crates/flow-sync", version = "0.1.2" }
+flow-tui = { path = "crates/flow-tui", version = "0.1.2" }
 
 # CLI
 clap = { version = "4.5", features = ["derive", "env"] }
@@ -95,6 +95,7 @@ uuid = { version = "1", features = ["v4"] }
 async-stream = "0.3"
 futures-core = "0.3"
 futures-util = { version = "0.3", features = ["sink"] }
+tokio-stream = { version = "0.1", features = ["sync"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

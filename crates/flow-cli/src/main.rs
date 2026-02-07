@@ -44,8 +44,9 @@ enum Commands {
     },
     /// Sync state across machines
     Sync,
-    /// Run security scans
-    Scan {
+    /// Run security audit
+    #[command(alias = "scan")]
+    Audit {
         /// Run all scanners
         #[arg(long)]
         all: bool,
@@ -77,6 +78,7 @@ enum Commands {
         db: Option<String>,
     },
     /// Launch the TUI monitor
+    #[command(alias = "tui")]
     Monitor,
     /// Manage themes
     Theme {
@@ -141,7 +143,7 @@ fn main() -> anyhow::Result<()> {
         Commands::Switch { query } => commands::switch::run(query.as_deref()),
         Commands::Worktree { action } => commands::worktree::run(action),
         Commands::Sync => commands::sync::run(),
-        Commands::Scan { all } => commands::scan::run(all),
+        Commands::Audit { all } => commands::scan::run(all),
         Commands::Status { mobile } => commands::status::run(mobile),
         Commands::Serve {
             port,

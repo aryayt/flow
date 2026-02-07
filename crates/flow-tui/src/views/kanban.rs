@@ -11,6 +11,18 @@ use ratatui::{
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
 
+    // Split main area into board and footer
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Min(0),    // Kanban board
+            Constraint::Length(1), // Footer
+        ])
+        .split(area);
+
+    let board_area = chunks[0];
+    let footer_area = chunks[1];
+
     // Split into three columns for Kanban board
     let columns = Layout::default()
         .direction(Direction::Horizontal)
@@ -19,7 +31,7 @@ pub fn render(frame: &mut Frame, app: &App) {
             Constraint::Ratio(1, 3),
             Constraint::Ratio(1, 3),
         ])
-        .split(area);
+        .split(board_area);
 
     // Separate features by status
     let pending: Vec<&Feature> = app
@@ -40,6 +52,18 @@ pub fn render(frame: &mut Frame, app: &App) {
     render_column(frame, columns[0], "Pending", &pending, app, "○");
     render_column(frame, columns[1], "In Progress", &in_progress, app, "◉");
     render_column(frame, columns[2], "Done", &done, app, "✓");
+
+    // Render footer with key hints
+    let theme = &app.tui_theme;
+    let footer_text = if let Some(status) = app.get_status_message() {
+        status.to_string()
+    } else {
+        " j/k:nav  Enter:claim  p:pass  f:fail  c:clear  r:refresh  t:theme  ?:help  q:quit"
+            .to_string()
+    };
+
+    let footer = Paragraph::new(footer_text).style(Style::default().fg(theme.muted));
+    frame.render_widget(footer, footer_area);
 }
 
 fn render_column(

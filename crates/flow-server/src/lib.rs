@@ -127,9 +127,20 @@ pub async fn run_server(config: AgentConfig) -> flow_core::Result<()> {
         });
     }
 
-    let listener = tokio::net::TcpListener::bind(addr)
-        .await
-        .map_err(flow_core::FlowError::Io)?;
+    let listener = tokio::net::TcpListener::bind(addr).await.map_err(|e| {
+        if e.kind() == std::io::ErrorKind::AddrInUse {
+            flow_core::FlowError::Io(std::io::Error::new(
+                std::io::ErrorKind::AddrInUse,
+                format!(
+                    "Port {} already in use. Try: flow serve --port {}",
+                    config.port,
+                    config.port + 1
+                ),
+            ))
+        } else {
+            flow_core::FlowError::Io(e)
+        }
+    })?;
 
     axum::serve(listener, app)
         .await

@@ -13,13 +13,19 @@ publish = false
 agentflow-core = { workspace = true }
 flow-db = { workspace = true }
 flow-resolver = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["process", "io-util", "sync", "time", "rt", "macros"] }
+tokio-stream = { version = "0.1", features = ["sync", "io-util"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tracing = { workspace = true }
 thiserror = { workspace = true }
 notify-debouncer-full = { workspace = true }
 notify = { workspace = true }
+chrono = { workspace = true }
+rusqlite = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3.14"
 
 [lints]
 workspace = true

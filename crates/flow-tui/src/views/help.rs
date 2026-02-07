@@ -75,6 +75,48 @@ pub fn render(frame: &mut Frame, app: &App) {
         ]),
         Line::from(""),
         Line::from(vec![Span::styled(
+            "Actions:",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        )]),
+        Line::from(vec![
+            Span::styled("  Enter/Space", Style::default().fg(theme.accent)),
+            Span::styled(
+                "Claim selected feature",
+                Style::default().fg(theme.foreground),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("  p       ", Style::default().fg(theme.accent)),
+            Span::styled(
+                "Mark selected as passing",
+                Style::default().fg(theme.foreground),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("  f       ", Style::default().fg(theme.accent)),
+            Span::styled(
+                "Mark selected as failing",
+                Style::default().fg(theme.foreground),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("  c       ", Style::default().fg(theme.accent)),
+            Span::styled(
+                "Clear in-progress flag",
+                Style::default().fg(theme.foreground),
+            ),
+        ]),
+        Line::from(vec![
+            Span::styled("  r       ", Style::default().fg(theme.accent)),
+            Span::styled(
+                "Refresh from database",
+                Style::default().fg(theme.foreground),
+            ),
+        ]),
+        Line::from(""),
+        Line::from(vec![Span::styled(
             "Other:",
             Style::default()
                 .fg(theme.primary)

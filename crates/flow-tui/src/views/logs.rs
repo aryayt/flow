@@ -1,14 +1,27 @@
 use crate::app::App;
 use ratatui::{
+    layout::{Constraint, Direction, Layout},
     style::{Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem},
+    widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
 
 pub fn render(frame: &mut Frame, app: &App) {
     let area = frame.area();
     let theme = &app.tui_theme;
+
+    // Split main area into logs and footer
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Min(0),    // Logs
+            Constraint::Length(1), // Footer
+        ])
+        .split(area);
+
+    let logs_area = chunks[0];
+    let footer_area = chunks[1];
 
     let block = Block::default()
         .title(format!("Logs ({} messages)", app.log_messages.len()))
@@ -20,8 +33,8 @@ pub fn render(frame: &mut Frame, app: &App) {
                 .add_modifier(Modifier::BOLD),
         );
 
-    let inner = block.inner(area);
-    frame.render_widget(block, area);
+    let inner = block.inner(logs_area);
+    frame.render_widget(block, logs_area);
 
     if app.log_messages.is_empty() {
         return;
@@ -53,4 +66,14 @@ pub fn render(frame: &mut Frame, app: &App) {
 
     let list = List::new(items);
     frame.render_widget(list, inner);
+
+    // Render footer with key hints
+    let footer_text = if let Some(status) = app.get_status_message() {
+        status.to_string()
+    } else {
+        " 1-4:views  r:refresh  t:theme  ?:help  q:quit".to_string()
+    };
+
+    let footer = Paragraph::new(footer_text).style(Style::default().fg(theme.muted));
+    frame.render_widget(footer, footer_area);
 }

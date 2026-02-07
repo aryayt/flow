@@ -1,6 +1,10 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use flow_core::{Feature, Theme};
+use flow_db::Database;
 use ratatui::Frame;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use crate::theme::TuiTheme;
 use crate::views;
@@ -35,6 +39,13 @@ pub struct App {
     #[allow(dead_code)]
     pub scroll_offset: usize,
     pub log_messages: Vec<String>,
+    pub db: Option<Arc<Database>>,
+    pub db_path: Option<PathBuf>,
+    pub db_error: Option<String>,
+    pub last_refresh: Instant,
+    pub refresh_interval: Duration,
+    pub status_message: Option<(String, Instant)>,
+    pub feature_stats: Option<flow_core::FeatureStats>,
 }
 
 impl Default for App {
@@ -45,6 +56,10 @@ impl Default for App {
 
 impl App {
     pub fn new() -> Self {
+        Self::with_db_path(None)
+    }
+
+    pub fn with_db_path(db_path: Option<PathBuf>) -> Self {
         let theme = Theme::default();
         let tui_theme = TuiTheme::from(&theme.colors());
 
@@ -61,9 +76,16 @@ impl App {
             terminal_height: 30,
             scroll_offset: 0,
             log_messages: Vec::new(),
+            db: None,
+            db_path,
+            db_error: None,
+            last_refresh: Instant::now(),
+            refresh_interval: Duration::from_secs(2),
+            status_message: None,
+            feature_stats: None,
         };
 
-        app.load_demo_data();
+        app.load_from_database();
         app
     }
 
@@ -122,6 +144,18 @@ impl App {
             self.cycle_theme();
         }
 
+        // Database actions
+        match key.code {
+            KeyCode::Enter | KeyCode::Char(' ') => self.claim_selected_feature(),
+            KeyCode::Char('p') => self.mark_selected_passing(),
+            KeyCode::Char('f') => self.mark_selected_failing(),
+            KeyCode::Char('c') if !key.modifiers.contains(KeyModifiers::CONTROL) => {
+                self.clear_selected_in_progress();
+            }
+            KeyCode::Char('r') => self.manual_refresh(),
+            _ => {}
+        }
+
         false
     }
 
@@ -175,6 +209,247 @@ impl App {
         // Keep last 100 messages
         if self.log_messages.len() > 100 {
             self.log_messages.remove(0);
+        }
+    }
+
+    pub fn set_status(&mut self, message: String) {
+        self.status_message = Some((message, Instant::now()));
+    }
+
+    pub fn get_status_message(&self) -> Option<&str> {
+        if let Some((msg, timestamp)) = &self.status_message {
+            // Show status for 3 seconds
+            if timestamp.elapsed() < Duration::from_secs(3) {
+                return Some(msg.as_str());
+            }
+        }
+        None
+    }
+
+    pub fn should_refresh(&self) -> bool {
+        self.last_refresh.elapsed() >= self.refresh_interval
+    }
+
+    pub fn auto_refresh(&mut self) {
+        if self.should_refresh() {
+            self.load_from_database();
+        }
+    }
+
+    pub fn load_from_database(&mut self) {
+        self.last_refresh = Instant::now();
+
+        // Determine database path
+        let db_path = if let Some(ref path) = self.db_path {
+            path.clone()
+        } else {
+            // Try default path: ~/.agent-flow/flow.db
+            let home = match std::env::var("HOME") {
+                Ok(h) => PathBuf::from(h),
+                Err(_) => {
+                    self.db_error = Some("HOME environment variable not set".to_string());
+                    self.load_demo_data();
+                    return;
+                }
+            };
+            home.join(".agent-flow").join("flow.db")
+        };
+
+        // Try to open database
+        match Database::open(&db_path) {
+            Ok(db) => {
+                let db = Arc::new(db);
+                self.db = Some(Arc::clone(&db));
+                self.db_path = Some(db_path.clone());
+                self.db_error = None;
+
+                // Load features
+                if let Ok(conn) = db.writer().lock() {
+                    match flow_db::FeatureStore::get_all(&conn) {
+                        Ok(features) => {
+                            self.features = features;
+                            if self.selected_index >= self.features.len()
+                                && !self.features.is_empty()
+                            {
+                                self.selected_index = self.features.len() - 1;
+                            }
+                        }
+                        Err(e) => {
+                            self.db_error = Some(format!("Failed to load features: {e}"));
+                            self.add_log(format!("Error loading features: {e}"));
+                        }
+                    }
+
+                    // Load stats
+                    match flow_db::FeatureStore::get_stats(&conn) {
+                        Ok(stats) => {
+                            self.feature_stats = Some(stats);
+                        }
+                        Err(e) => {
+                            self.add_log(format!("Error loading stats: {e}"));
+                        }
+                    }
+                } else {
+                    self.db_error = Some("Failed to acquire database lock".to_string());
+                }
+
+                self.add_log(format!(
+                    "Loaded {} features from database",
+                    self.features.len()
+                ));
+            }
+            Err(e) => {
+                self.db_error = Some(format!("Failed to open database: {e}"));
+                self.add_log("No database found. Run 'flow init' to create one, or 'flow features add' to add features.".to_string());
+                self.load_demo_data();
+            }
+        }
+    }
+
+    fn manual_refresh(&mut self) {
+        self.load_from_database();
+        self.set_status("✓ Refreshed from database".to_string());
+    }
+
+    fn claim_selected_feature(&mut self) {
+        if self.features.is_empty() {
+            return;
+        }
+
+        let feature_id = self.features[self.selected_index].id;
+        let feature_name = self.features[self.selected_index].name.clone();
+
+        let db = match &self.db {
+            Some(db) => Arc::clone(db),
+            None => return,
+        };
+
+        let result = {
+            if let Ok(conn) = db.writer().lock() {
+                flow_db::FeatureStore::claim_and_get(&conn, feature_id)
+            } else {
+                return;
+            }
+        };
+
+        match result {
+            Ok(_) => {
+                self.set_status(format!("✓ Claimed \"{}\" (#{feature_id})", feature_name));
+                self.add_log(format!("Claimed feature #{feature_id}: {feature_name}"));
+                self.load_from_database();
+            }
+            Err(e) => {
+                self.set_status(format!("✗ Failed to claim: {e}"));
+                self.add_log(format!("Failed to claim feature #{feature_id}: {e}"));
+            }
+        }
+    }
+
+    fn mark_selected_passing(&mut self) {
+        if self.features.is_empty() {
+            return;
+        }
+
+        let feature_id = self.features[self.selected_index].id;
+        let feature_name = self.features[self.selected_index].name.clone();
+
+        let db = match &self.db {
+            Some(db) => Arc::clone(db),
+            None => return,
+        };
+
+        let result = {
+            if let Ok(conn) = db.writer().lock() {
+                flow_db::FeatureStore::mark_passing(&conn, feature_id)
+            } else {
+                return;
+            }
+        };
+
+        match result {
+            Ok(()) => {
+                self.set_status(format!("✓ Marked \"{}\" as passing", feature_name));
+                self.add_log(format!("Marked feature #{feature_id} as passing"));
+                self.load_from_database();
+            }
+            Err(e) => {
+                self.set_status(format!("✗ Failed to mark passing: {e}"));
+                self.add_log(format!(
+                    "Failed to mark feature #{feature_id} as passing: {e}"
+                ));
+            }
+        }
+    }
+
+    fn mark_selected_failing(&mut self) {
+        if self.features.is_empty() {
+            return;
+        }
+
+        let feature_id = self.features[self.selected_index].id;
+        let feature_name = self.features[self.selected_index].name.clone();
+
+        let db = match &self.db {
+            Some(db) => Arc::clone(db),
+            None => return,
+        };
+
+        let result = {
+            if let Ok(conn) = db.writer().lock() {
+                flow_db::FeatureStore::mark_failing(&conn, feature_id)
+            } else {
+                return;
+            }
+        };
+
+        match result {
+            Ok(()) => {
+                self.set_status(format!("✓ Marked \"{}\" as failing", feature_name));
+                self.add_log(format!("Marked feature #{feature_id} as failing"));
+                self.load_from_database();
+            }
+            Err(e) => {
+                self.set_status(format!("✗ Failed to mark failing: {e}"));
+                self.add_log(format!(
+                    "Failed to mark feature #{feature_id} as failing: {e}"
+                ));
+            }
+        }
+    }
+
+    fn clear_selected_in_progress(&mut self) {
+        if self.features.is_empty() {
+            return;
+        }
+
+        let feature_id = self.features[self.selected_index].id;
+        let feature_name = self.features[self.selected_index].name.clone();
+
+        let db = match &self.db {
+            Some(db) => Arc::clone(db),
+            None => return,
+        };
+
+        let result = {
+            if let Ok(conn) = db.writer().lock() {
+                flow_db::FeatureStore::clear_in_progress(&conn, feature_id)
+            } else {
+                return;
+            }
+        };
+
+        match result {
+            Ok(()) => {
+                self.set_status(format!("✓ Cleared in-progress for \"{}\"", feature_name));
+                self.add_log(format!("Cleared in-progress for feature #{feature_id}"));
+                self.load_from_database();
+            }
+            Err(e) => {
+                self.set_status(format!("✗ Failed to clear in-progress: {e}"));
+                self.add_log(format!(
+                    "Failed to clear in-progress for feature #{feature_id}: {e}"
+                ));
+            }
         }
     }
 

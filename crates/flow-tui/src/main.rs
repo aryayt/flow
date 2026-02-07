@@ -5,6 +5,7 @@ use crossterm::{
 };
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::io;
+use std::path::PathBuf;
 
 fn main() -> io::Result<()> {
     enable_raw_mode()?;
@@ -13,7 +14,10 @@ fn main() -> io::Result<()> {
     let backend = CrosstermBackend::new(stdout);
     let mut terminal = Terminal::new(backend)?;
 
-    let mut app = flow_tui::app::App::new();
+    // Determine database path from CLI args or default
+    let db_path = std::env::args().nth(1).map(PathBuf::from);
+
+    let mut app = flow_tui::app::App::with_db_path(db_path);
     let result = run_app(&mut terminal, &mut app);
 
     disable_raw_mode()?;
@@ -42,6 +46,9 @@ fn run_app<B: ratatui::backend::Backend>(
                 }
                 _ => {}
             }
+        } else {
+            // Auto-refresh on timeout (no key pressed)
+            app.auto_refresh();
         }
     }
 }
