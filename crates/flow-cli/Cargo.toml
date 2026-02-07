@@ -22,6 +22,10 @@ flow-core = { path = "../flow-core" }
 flow-git = { path = "../flow-git" }
 flow-tmux = { path = "../flow-tmux" }
 flow-sync = { path = "../flow-sync" }
+flow-db = { path = "../flow-db" }
+flow-resolver = { path = "../flow-resolver" }
+flow-server = { path = "../flow-server" }
+flow-tui = { path = "../flow-tui" }
 
 clap.workspace = true
 anyhow.workspace = true
@@ -31,6 +35,8 @@ skim.workspace = true
 ratatui.workspace = true
 crossterm.workspace = true
 dirs.workspace = true
+tokio.workspace = true
+rusqlite.workspace = true
 
 [dev-dependencies]
 assert_cmd.workspace = true
