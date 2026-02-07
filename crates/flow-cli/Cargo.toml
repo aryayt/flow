@@ -1,5 +1,5 @@
 [package]
-name = "flow-cli"
+name = "agentflow-cli"
 description = "Git worktree workflow manager with AI agent task monitoring, Kanban board, and terminal UI"
 version.workspace = true
 edition.workspace = true
@@ -17,7 +17,7 @@ name = "flow"
 path = "src/main.rs"
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 flow-git = { workspace = true }
 flow-tmux = { workspace = true }
 flow-sync = { workspace = true }

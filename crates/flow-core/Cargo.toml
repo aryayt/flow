@@ -1,5 +1,5 @@
 [package]
-name = "flow-core"
+name = "agentflow-core"
 description = "Shared types, configuration, themes, and error handling for the Flow workspace manager"
 version.workspace = true
 edition.workspace = true
@@ -10,6 +10,9 @@ repository.workspace = true
 readme = "README.md"
 keywords = ["workflow", "types", "configuration", "themes"]
 categories = ["development-tools"]
+
+[lib]
+name = "flow_core"
 
 [dependencies]
 serde.workspace = true

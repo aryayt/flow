@@ -12,7 +12,7 @@ keywords = ["tui", "ratatui", "kanban", "terminal", "dashboard"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 flow-db = { workspace = true }
 flow-resolver = { workspace = true }
 ratatui = { workspace = true }

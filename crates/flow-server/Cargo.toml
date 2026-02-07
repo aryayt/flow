@@ -12,7 +12,7 @@ keywords = ["axum", "server", "sse", "websocket", "monitoring"]
 categories = ["web-programming::http-server"]
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 flow-db = { workspace = true }
 flow-resolver = { workspace = true }
 axum = { workspace = true }

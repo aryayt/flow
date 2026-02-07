@@ -11,7 +11,7 @@ keywords = ["sync", "state"]
 categories = ["development-tools"]
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 tokio.workspace = true
 serde.workspace = true
 thiserror.workspace = true

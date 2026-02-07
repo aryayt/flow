@@ -11,7 +11,7 @@ keywords = ["git", "worktree"]
 categories = ["development-tools"]
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 gix.workspace = true
 thiserror.workspace = true
 tracing.workspace = true

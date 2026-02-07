@@ -12,7 +12,7 @@ keywords = ["topological-sort", "dependency", "scheduling", "graph"]
 categories = ["algorithms"]
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]

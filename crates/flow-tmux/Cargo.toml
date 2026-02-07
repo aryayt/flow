@@ -11,7 +11,7 @@ keywords = ["tmux", "terminal", "session"]
 categories = ["development-tools"]
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 tmux_interface.workspace = true
 thiserror.workspace = true
 tracing.workspace = true

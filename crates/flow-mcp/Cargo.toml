@@ -10,7 +10,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 flow-db = { workspace = true }
 flow-resolver = { workspace = true }
 serde = { workspace = true }

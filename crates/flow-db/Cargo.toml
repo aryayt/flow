@@ -12,7 +12,7 @@ keywords = ["sqlite", "database", "features", "crud"]
 categories = ["database"]
 
 [dependencies]
-flow-core = { workspace = true }
+agentflow-core = { workspace = true }
 rusqlite = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

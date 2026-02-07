@@ -24,7 +24,7 @@ repository = "https://github.com/aryayt/flow"
 
 [workspace.dependencies]
 # Internal crates
-flow-core = { path = "crates/flow-core", version = "0.1.1" }
+agentflow-core = { path = "crates/flow-core", version = "0.1.1" }
 flow-db = { path = "crates/flow-db", version = "0.1.1" }
 flow-resolver = { path = "crates/flow-resolver", version = "0.1.1" }
 flow-server = { path = "crates/flow-server", version = "0.1.1" }
